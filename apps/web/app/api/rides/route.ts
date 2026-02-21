@@ -5,7 +5,8 @@ import { createServerClient } from '@gbt/db'
 // POST /api/rides — Yeni sefer talebi oluştur
 export async function POST(request: NextRequest) {
   const cookieStore = cookies()
-  const supabase = createServerClient(cookieStore)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const supabase = createServerClient(cookieStore) as any
 
   // Oturum kontrolü
   const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -18,7 +19,7 @@ export async function POST(request: NextRequest) {
     .from('users')
     .select('id, role')
     .eq('auth_id', user.id)
-    .single()
+    .single() as { data: { id: string; role: string } | null }
 
   if (!dbUser || dbUser.role !== 'customer') {
     return NextResponse.json({ error: 'Bu işlem için müşteri hesabı gerekiyor' }, { status: 403 })
@@ -81,7 +82,8 @@ export async function POST(request: NextRequest) {
 // GET /api/rides — Müşterinin kendi seferlerini listele
 export async function GET(request: NextRequest) {
   const cookieStore = cookies()
-  const supabase = createServerClient(cookieStore)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const supabase = createServerClient(cookieStore) as any
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Yetkisiz' }, { status: 401 })
@@ -90,7 +92,7 @@ export async function GET(request: NextRequest) {
     .from('users')
     .select('id')
     .eq('auth_id', user.id)
-    .single()
+    .single() as { data: { id: string } | null }
 
   if (!dbUser) return NextResponse.json({ error: 'Kullanıcı bulunamadı' }, { status: 404 })
 
