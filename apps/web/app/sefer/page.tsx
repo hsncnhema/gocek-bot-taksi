@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import DumenLoading from '../../components/DumenLoading'
+import DumenLoading from '../../components/LoadingSpinner'
 
 const MOCK_SEFER = {
   id: 'SF-2026-0421',
