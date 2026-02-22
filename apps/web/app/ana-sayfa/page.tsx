@@ -11,19 +11,21 @@ const supabase = createBrowserClient(
 )
 
 const KOYLAR = [
-  { isim: 'Tersane Adası', sure: '8 dk', emoji: '🏛️' },
-  { isim: 'Sarsala Koyu', sure: '12 dk', emoji: '🌿' },
-  { isim: 'Yassıca Adaları', sure: '18 dk', emoji: '🏝️' },
-  { isim: 'Cleopatra Koyu', sure: '22 dk', emoji: '✨' },
-  { isim: 'Küçük Göcek', sure: '6 dk', emoji: '⚓' },
-  { isim: 'Boynuzbükü', sure: '25 dk', emoji: '🐠' },
+  { isim: 'Tersane Koyu', sure: '8 dk', emoji: '🏛️' },
+  { isim: 'Akvaryum Koyu', sure: '10 dk', emoji: '🐟' },
+  { isim: 'Yassıca Adası', sure: '15 dk', emoji: '🏝️' },
+  { isim: 'Boynuz Bükü', sure: '20 dk', emoji: '⚓' },
+  { isim: 'Bedri Rahmi Koyu', sure: '18 dk', emoji: '🎨' },
+  { isim: 'Büyük Sarsala', sure: '25 dk', emoji: '🌿' },
+  { isim: 'Hamam Koyu', sure: '22 dk', emoji: '💎' },
+  { isim: 'Göcek Adası', sure: '12 dk', emoji: '🌊' },
 ]
 
 const OZELLIKLER = [
   { icon: '⚡', baslik: 'Anında Rezervasyon', aciklama: 'Kaptan onayı dakikalar içinde. Bekleme yok.' },
   { icon: '📍', baslik: 'Gerçek Zamanlı Takip', aciklama: 'Botunuzu haritada canlı izleyin, ETA takibi yapın.' },
-  { icon: '⭐', baslik: 'Puanlı Kaptanlar', aciklama: 'Yüzlerce sefer deneyimli, lisanslı kaptanlar.' },
-  { icon: '🛡️', baslik: 'Güvenli Ödeme', aciklama: 'Iyzico ile güvenli ödeme, sefer sonrası ücretlendirme.' },
+  { icon: '🗺️', baslik: 'Kolay Rota Seçimi', aciklama: 'Haritadan iniş biniş noktanızı kolayca seçin.' },
+  { icon: '🛡️', baslik: 'Güvenli Ödeme', aciklama: 'Güvenli ödeme seçenekleri, sefer sonrası ücretlendirme.' },
 ]
 
 export default function AnaSayfa() {
@@ -36,7 +38,6 @@ export default function AnaSayfa() {
   const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // Kullanıcı oturumunu al
     supabase.auth.getUser().then(({ data }) => setUser(data.user))
     const { data: listener } = supabase.auth.onAuthStateChange((_e, session) => {
       setUser(session?.user ?? null)
@@ -55,7 +56,6 @@ export default function AnaSayfa() {
     return () => clearInterval(t)
   }, [])
 
-  // Menü dışına tıklayınca kapat
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -77,6 +77,11 @@ export default function AnaSayfa() {
     setTimeout(() => router.push('/rezervasyon'), 900)
   }
 
+  function handleTekneler() {
+    setLoading(true)
+    setTimeout(() => router.push('/tekneler'), 900)
+  }
+
   function handleGiris() {
     setLoading(true)
     setTimeout(() => router.push('/giris'), 900)
@@ -88,46 +93,13 @@ export default function AnaSayfa() {
     : user?.email?.slice(0, 2).toUpperCase() ?? '?'
   const displayName = user?.user_metadata?.full_name ?? user?.email?.split('@')[0] ?? ''
 
+
   return (
     <div style={{ background: '#050e1d', minHeight: '100vh', fontFamily: "'Georgia', serif", overflowX: 'hidden' }}>
       {loading && <DumenLoading text="Hazırlanıyor" />}
 
-      <style>{`
-        @keyframes fadeUp { from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:translateY(0)} }
-        @keyframes floatWave { 0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)} }
-        @keyframes shimmerText { 0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%} }
-        @keyframes ripple { 0%{transform:scale(0.8);opacity:0.6}100%{transform:scale(2.4);opacity:0} }
-        @keyframes slideKoy { from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)} }
-        @keyframes dropDown { from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)} }
-        .fade1{animation:fadeUp 0.8s ease-out 0.1s both}
-        .fade2{animation:fadeUp 0.8s ease-out 0.3s both}
-        .fade3{animation:fadeUp 0.8s ease-out 0.5s both}
-        .fade4{animation:fadeUp 0.8s ease-out 0.7s both}
-        .float{animation:floatWave 4s ease-in-out infinite}
-        .shimmer-text{
-          background:linear-gradient(90deg,#ffffff,#00c6ff,#ffffff,#0D7EA0,#ffffff);
-          background-size:300% 100%;
-          -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-          animation:shimmerText 5s ease-in-out infinite;
-        }
-        .btn-primary{transition:all 0.25s;cursor:pointer}
-        .btn-primary:hover{transform:translateY(-3px);box-shadow:0 16px 40px rgba(13,126,160,0.5)!important}
-        .btn-secondary{transition:all 0.25s;cursor:pointer}
-        .btn-secondary:hover{background:rgba(255,255,255,0.1)!important;transform:translateY(-2px)}
-        .koy-card{transition:all 0.2s;cursor:pointer}
-        .koy-card:hover{border-color:rgba(13,126,160,0.5)!important;transform:translateY(-4px)}
-        .ozellik-card{transition:all 0.25s}
-        .ozellik-card:hover{transform:translateY(-6px);border-color:rgba(13,126,160,0.4)!important}
-        .stat-num{background:linear-gradient(135deg,#00c6ff,#0D7EA0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-        .dropdown{animation:dropDown 0.2s ease-out both}
-        .dropdown-item{transition:background 0.15s;cursor:pointer}
-        .dropdown-item:hover{background:rgba(255,255,255,0.08)!important}
-        .avatar-btn{transition:all 0.2s;cursor:pointer}
-        .avatar-btn:hover{transform:scale(1.05);box-shadow:0 0 0 3px rgba(13,126,160,0.5)!important}
-      `}</style>
-
       {/* NAV */}
-      <nav style={{
+      <nav className="nav-inner" style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
         padding: '16px 40px',
         background: scrollY > 50 ? 'rgba(5,14,29,0.95)' : 'transparent',
@@ -136,42 +108,44 @@ export default function AnaSayfa() {
         transition: 'all 0.3s',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <span style={{ fontSize: '28px' }}>⚓</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ fontSize: '24px' }}>⚓</span>
           <div>
-            <span style={{ color: 'white', fontWeight: 'bold', fontSize: '18px', letterSpacing: '0.05em' }}>Göcek Bot Taksi</span>
-            <div style={{ color: '#0D7EA0', fontSize: '10px', letterSpacing: '0.2em' }}>GÖCEK · TÜRKİYE</div>
+            <span className="nav-logo-text" style={{ color: 'white', fontWeight: 'bold', fontSize: '18px', letterSpacing: '0.05em' }}>Göcek Bot Taksi</span>
+            <div className="nav-logo-sub" style={{ color: '#0D7EA0', fontSize: '10px', letterSpacing: '0.2em' }}>GÖCEK · TÜRKİYE</div>
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          {/* Nav linkleri */}
+          <button onClick={handleTekneler} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontSize: '14px', padding: '8px 14px', borderRadius: '20px', transition: 'all 0.2s', fontFamily: 'Georgia,serif' }}
+            onMouseEnter={e => (e.currentTarget.style.color = 'white')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.6)')}>
+            ⛵ Teknelerimiz
+          </button>
           {user ? (
-            /* Giriş yapılmış — avatar + dropdown */
             <div ref={menuRef} style={{ position: 'relative' }}>
               <div className="avatar-btn" onClick={() => setMenuOpen(o => !o)} style={{
-                display: 'flex', alignItems: 'center', gap: '10px',
+                display: 'flex', alignItems: 'center', gap: '8px',
                 background: 'rgba(255,255,255,0.06)',
                 border: '1px solid rgba(255,255,255,0.12)',
-                borderRadius: '25px', padding: '6px 16px 6px 6px',
+                borderRadius: '25px', padding: '6px 14px 6px 6px',
                 boxShadow: menuOpen ? '0 0 0 3px rgba(13,126,160,0.4)' : 'none',
-                transition: 'all 0.2s',
               }}>
-                {/* Avatar */}
                 {user.user_metadata?.avatar_url ? (
                   <img src={user.user_metadata.avatar_url} alt="profil"
-                    style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} />
+                    style={{ width: '30px', height: '30px', borderRadius: '50%', objectFit: 'cover' }} />
                 ) : (
-                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg, #0D7EA0, #00c6ff)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 'bold', color: 'white' }}>
+                  <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'linear-gradient(135deg, #0D7EA0, #00c6ff)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'white' }}>
                     {initials}
                   </div>
                 )}
-                <span style={{ color: 'white', fontSize: '14px', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <span className="avatar-name" style={{ color: 'white', fontSize: '14px', maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {displayName}
                 </span>
-                <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', transition: 'transform 0.2s', transform: menuOpen ? 'rotate(180deg)' : 'none', display: 'inline-block' }}>▾</span>
+                <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', transform: menuOpen ? 'rotate(180deg)' : 'none', display: 'inline-block', transition: 'transform 0.2s' }}>▾</span>
               </div>
 
-              {/* Dropdown menü */}
               {menuOpen && (
                 <div className="dropdown" style={{
                   position: 'absolute', top: 'calc(100% + 8px)', right: 0,
@@ -182,14 +156,13 @@ export default function AnaSayfa() {
                   boxShadow: '0 16px 48px rgba(0,0,0,0.5)',
                   backdropFilter: 'blur(20px)',
                 }}>
-                  {/* Kullanıcı bilgisi */}
                   <div style={{ padding: '10px 12px 12px', borderBottom: '1px solid rgba(255,255,255,0.07)', marginBottom: '6px' }}>
                     <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '0 0 2px', letterSpacing: '0.08em' }}>HESABINIZ</p>
                     <p style={{ color: 'white', fontSize: '13px', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</p>
                   </div>
-
                   {[
                     { icon: '🚤', label: 'Rezervasyon Yap', action: handleRezervasyon },
+                    { icon: '⛵', label: 'Teknelerimiz', action: handleTekneler },
                     { icon: '📋', label: 'Sefer Geçmişi', action: () => {} },
                     { icon: '👤', label: 'Profil Ayarları', action: () => {} },
                   ].map(item => (
@@ -198,7 +171,6 @@ export default function AnaSayfa() {
                       <span style={{ color: 'white', fontSize: '14px' }}>{item.label}</span>
                     </div>
                   ))}
-
                   <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', marginTop: '6px', paddingTop: '6px' }}>
                     <div className="dropdown-item" onClick={handleCikis} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', borderRadius: '8px' }}>
                       <span style={{ fontSize: '16px' }}>🚪</span>
@@ -209,10 +181,9 @@ export default function AnaSayfa() {
               )}
             </div>
           ) : (
-            /* Giriş yapılmamış */
             <>
-              <button onClick={handleGiris} className="btn-secondary" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'white', padding: '10px 22px', borderRadius: '25px', fontSize: '14px' }}>Giriş Yap</button>
-              <button onClick={handleRezervasyon} className="btn-primary" style={{ background: '#0D7EA0', border: 'none', color: 'white', padding: '10px 22px', borderRadius: '25px', fontSize: '14px', fontWeight: 'bold', boxShadow: '0 8px 24px rgba(13,126,160,0.35)' }}>Rezervasyon →</button>
+              <button onClick={handleGiris} className="btn-secondary" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'white', padding: '9px 18px', borderRadius: '25px', fontSize: '14px' }}>Giriş Yap</button>
+              <button onClick={handleRezervasyon} className="btn-primary" style={{ background: '#0D7EA0', border: 'none', color: 'white', padding: '9px 18px', borderRadius: '25px', fontSize: '14px', fontWeight: 'bold', boxShadow: '0 8px 24px rgba(13,126,160,0.35)' }}>Rezervasyon →</button>
             </>
           )}
         </div>
@@ -220,70 +191,122 @@ export default function AnaSayfa() {
 
       {/* HERO */}
       <div style={{ position: 'relative', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 80% 60% at 50% 40%, rgba(13,126,160,0.18) 0%, transparent 70%), radial-gradient(ellipse 40% 40% at 20% 80%, rgba(0,198,255,0.08) 0%, transparent 60%), radial-gradient(ellipse 50% 50% at 80% 20%, rgba(26,60,94,0.3) 0%, transparent 60%)' }} />
 
-        {Array.from({ length: 60 }).map((_, i) => (
+        {[
+  { w: 2.3, op: 0.11, t: '27.5%', l: '22.3%' },
+  { w: 2.5, op: 0.44, t: '89.2%', l: '8.7%' },
+  { w: 1.8, op: 0.11, t: '21.9%', l: '50.5%' },
+  { w: 1.1, op: 0.2, t: '65.0%', l: '54.5%' },
+  { w: 1.4, op: 0.39, t: '80.9%', l: '0.6%' },
+  { w: 2.6, op: 0.45, t: '34.0%', l: '15.5%' },
+  { w: 2.9, op: 0.27, t: '9.3%', l: '9.7%' },
+  { w: 2.7, op: 0.4, t: '80.7%', l: '73.0%' },
+  { w: 2.1, op: 0.59, t: '37.9%', l: '55.2%' },
+  { w: 2.7, op: 0.41, t: '86.2%', l: '57.7%' },
+  { w: 2.4, op: 0.12, t: '22.8%', l: '28.9%' },
+  { w: 1.2, op: 0.22, t: '10.1%', l: '27.8%' },
+  { w: 2.3, op: 0.28, t: '37.0%', l: '21.0%' },
+  { w: 1.5, op: 0.57, t: '64.8%', l: '60.9%' },
+  { w: 1.3, op: 0.46, t: '16.3%', l: '37.9%' },
+  { w: 3.0, op: 0.42, t: '55.7%', l: '68.5%' },
+  { w: 2.7, op: 0.49, t: '22.9%', l: '3.2%' },
+  { w: 1.6, op: 0.23, t: '21.1%', l: '94.3%' },
+  { w: 2.8, op: 0.26, t: '65.5%', l: '39.6%' },
+  { w: 2.8, op: 0.33, t: '26.5%', l: '24.7%' },
+  { w: 2.1, op: 0.23, t: '58.5%', l: '89.8%' },
+  { w: 1.8, op: 0.21, t: '99.8%', l: '51.0%' },
+  { w: 1.2, op: 0.12, t: '11.0%', l: '62.7%' },
+  { w: 2.6, op: 0.31, t: '6.4%', l: '38.2%' },
+  { w: 3.0, op: 0.36, t: '97.1%', l: '86.1%' },
+  { w: 1.0, op: 0.46, t: '68.2%', l: '53.7%' },
+  { w: 1.5, op: 0.42, t: '11.2%', l: '43.5%' },
+  { w: 1.9, op: 0.58, t: '87.6%', l: '26.3%' },
+  { w: 2.0, op: 0.19, t: '91.3%', l: '87.1%' },
+  { w: 1.6, op: 0.42, t: '60.9%', l: '15.3%' },
+  { w: 2.5, op: 0.37, t: '77.9%', l: '53.0%' },
+  { w: 1.0, op: 0.26, t: '1.9%', l: '92.9%' },
+  { w: 2.8, op: 0.52, t: '30.8%', l: '5.8%' },
+  { w: 2.8, op: 0.57, t: '8.6%', l: '48.6%' },
+  { w: 1.1, op: 0.48, t: '76.6%', l: '12.8%' },
+  { w: 2.0, op: 0.37, t: '26.5%', l: '87.2%' },
+  { w: 1.8, op: 0.21, t: '53.9%', l: '73.0%' },
+  { w: 1.4, op: 0.26, t: '99.5%', l: '65.0%' },
+  { w: 1.9, op: 0.36, t: '12.1%', l: '22.5%' },
+  { w: 1.7, op: 0.39, t: '23.0%', l: '22.0%' },
+  { w: 1.1, op: 0.42, t: '22.9%', l: '90.5%' },
+  { w: 2.7, op: 0.14, t: '23.8%', l: '66.9%' },
+  { w: 1.4, op: 0.17, t: '93.6%', l: '57.1%' },
+  { w: 1.9, op: 0.49, t: '80.7%', l: '19.0%' },
+  { w: 1.2, op: 0.32, t: '42.4%', l: '46.7%' },
+  { w: 2.5, op: 0.44, t: '98.4%', l: '9.8%' },
+  { w: 1.8, op: 0.27, t: '86.2%', l: '24.9%' },
+  { w: 1.4, op: 0.32, t: '42.2%', l: '27.9%' },
+  { w: 1.5, op: 0.56, t: '44.3%', l: '86.1%' },
+  { w: 2.1, op: 0.13, t: '99.9%', l: '83.6%' }
+        ].map((s, i) => (
           <div key={i} style={{
             position: 'absolute',
-            width: Math.random() * 2 + 1 + 'px', height: Math.random() * 2 + 1 + 'px',
+            width: s.w + 'px', height: s.w + 'px',
             borderRadius: '50%', background: 'white',
-            opacity: Math.random() * 0.6 + 0.1,
-            top: Math.random() * 100 + '%', left: Math.random() * 100 + '%',
-            transform: `translateY(${parallaxY * (Math.random() * 0.5 + 0.1)}px)`,
-            transition: 'transform 0.1s linear',
+            opacity: s.op, top: s.t, left: s.l,
+            pointerEvents: 'none',
           }} />
         ))}
-
-        {[1, 2, 3].map(i => (
-          <div key={i} style={{ position: 'absolute', width: '600px', height: '600px', borderRadius: '50%', border: '1px solid rgba(13,126,160,0.15)', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', animation: `ripple ${3 + i}s ease-out ${i * 1.2}s infinite`, pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 80% 60% at 50% 40%, rgba(13,126,160,0.18) 0%, transparent 70%), radial-gradient(ellipse 40% 40% at 20% 80%, rgba(0,198,255,0.08) 0%, transparent 60%)' }} />
+{[1, 2, 3].map(i => (
+          <div key={i} style={{ position: 'absolute', width: '600px', height: '600px', borderRadius: '50%', border: '1px solid rgba(13,126,160,0.12)', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', animation: `ripple ${3 + i}s ease-out ${i * 1.2}s infinite`, pointerEvents: 'none' }} />
         ))}
 
-        <div style={{ textAlign: 'center', maxWidth: '780px', padding: '0 24px', position: 'relative', zIndex: 10 }}>
-          <div className="fade1" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(13,126,160,0.15)', border: '1px solid rgba(13,126,160,0.35)', borderRadius: '20px', padding: '6px 16px', marginBottom: '32px' }}>
-            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#00c6ff', display: 'inline-block', boxShadow: '0 0 8px #00c6ff' }} />
+        <div style={{ textAlign: 'center', maxWidth: '780px', padding: '0 20px', position: 'relative', zIndex: 10, paddingTop: '80px' }}>
+          <div className="fade1" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(13,126,160,0.15)', border: '1px solid rgba(13,126,160,0.35)', borderRadius: '20px', padding: '6px 16px', marginBottom: '28px' }}>
+            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#00c6ff', display: 'inline-block', boxShadow: '0 0 8px #00c6ff' }} />
             <span style={{ color: '#00c6ff', fontSize: '13px', letterSpacing: '0.08em' }}>Göcek'te Hizmetinizdeyiz</span>
           </div>
 
-          <h1 className="fade2" style={{ fontSize: '64px', fontWeight: 'bold', margin: '0 0 16px', lineHeight: '1.1', color: 'white' }}>
-            Koyda Her Yere,<br />
-            <span className="shimmer-text">Anında Ulaşım</span>
+          <h1 className="fade2" style={{ margin: '0 0 12px', lineHeight: '1.1' }}>
+            <span className="hero-title-sub" style={{ display: 'block', fontSize: '32px', fontWeight: '600', color: 'rgba(255,255,255,0.75)', marginBottom: '6px' }}>
+              Koyda Her Yere,
+            </span>
+            <span className="hero-title-main shimmer-text" style={{ display: 'block', fontSize: '72px', fontWeight: 'bold' }}>
+              Anında Ulaşım
+            </span>
           </h1>
 
-          <p className="fade3" style={{ color: 'rgba(255,255,255,0.55)', fontSize: '20px', lineHeight: '1.6', margin: '0 0 40px', maxWidth: '560px', marginLeft: 'auto', marginRight: 'auto' }}>
+          <p className="fade3 hero-desc" style={{ color: 'rgba(255,255,255,0.55)', fontSize: '18px', lineHeight: '1.6', margin: '0 0 36px', maxWidth: '520px', marginLeft: 'auto', marginRight: 'auto' }}>
             Göcek'in eşsiz koylarına dakikalar içinde ulaşın. Profesyonel kaptanlar, konforlu tekneler.
           </p>
 
-          <div className="fade3" style={{ display: 'flex', justifyContent: 'center', marginBottom: '40px' }}>
-            <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '14px', padding: '14px 24px', display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px' }}>Şu an</span>
+          <div className="fade3" style={{ display: 'flex', justifyContent: 'center', marginBottom: '36px' }}>
+            <div className="koy-indicator" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '14px', padding: '12px 24px', display: 'inline-flex', alignItems: 'center', gap: '16px' }}>
+              <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', whiteSpace: 'nowrap' }}>Şu an</span>
               <div key={activeKoy} style={{ display: 'flex', alignItems: 'center', gap: '8px', animation: 'slideKoy 0.4s ease-out' }}>
                 <span style={{ fontSize: '18px' }}>{KOYLAR[activeKoy].emoji}</span>
                 <span style={{ color: 'white', fontWeight: 'bold', fontSize: '15px' }}>{KOYLAR[activeKoy].isim}</span>
-                <span style={{ background: 'rgba(13,126,160,0.25)', color: '#00c6ff', fontSize: '12px', padding: '2px 10px', borderRadius: '20px', border: '1px solid rgba(0,198,255,0.2)' }}>{KOYLAR[activeKoy].sure}</span>
+                <span style={{ background: 'rgba(13,126,160,0.25)', color: '#00c6ff', fontSize: '12px', padding: '2px 10px', borderRadius: '20px', border: '1px solid rgba(0,198,255,0.2)', whiteSpace: 'nowrap' }}>{KOYLAR[activeKoy].sure}</span>
               </div>
             </div>
           </div>
 
-          <div className="fade4" style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button onClick={handleRezervasyon} className="btn-primary" style={{ background: '#0D7EA0', border: 'none', color: 'white', padding: '16px 40px', borderRadius: '30px', fontSize: '17px', fontWeight: 'bold', boxShadow: '0 12px 36px rgba(13,126,160,0.45)', letterSpacing: '0.02em' }}>
+          <div className="fade4 hero-btns" style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button onClick={handleRezervasyon} className="btn-primary" style={{ background: '#0D7EA0', border: 'none', color: 'white', padding: '15px 36px', borderRadius: '30px', fontSize: '16px', fontWeight: 'bold', boxShadow: '0 12px 36px rgba(13,126,160,0.45)', letterSpacing: '0.02em' }}>
               Bot Rezervasyonu Yap
             </button>
             {!user && (
-              <button onClick={handleGiris} className="btn-secondary" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.15)', color: 'white', padding: '16px 32px', borderRadius: '30px', fontSize: '17px' }}>
+              <button onClick={handleGiris} className="btn-secondary" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.15)', color: 'white', padding: '15px 28px', borderRadius: '30px', fontSize: '16px' }}>
                 Giriş Yap
               </button>
             )}
           </div>
 
-          <div className="fade4" style={{ display: 'flex', justifyContent: 'center', gap: '40px', marginTop: '56px', flexWrap: 'wrap' }}>
+          <div className="fade4 hero-stats" style={{ display: 'flex', justifyContent: 'center', gap: '36px', marginTop: '52px', flexWrap: 'wrap' }}>
             {[
               { sayi: '1,200+', etiket: 'Tamamlanan Sefer' },
-              { sayi: '4.9★', etiket: 'Ortalama Puan' },
               { sayi: '8 dk', etiket: 'Ortalama Bekleme' },
               { sayi: '12', etiket: 'Aktif Bot' },
+              { sayi: '22', etiket: 'Varış Noktası' },
             ].map(s => (
               <div key={s.sayi} style={{ textAlign: 'center' }}>
-                <div className="stat-num" style={{ fontSize: '28px', fontWeight: 'bold' }}>{s.sayi}</div>
+                <div className="stat-num" style={{ fontSize: '26px', fontWeight: 'bold' }}>{s.sayi}</div>
                 <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', letterSpacing: '0.08em', marginTop: '4px' }}>{s.etiket}</div>
               </div>
             ))}
@@ -298,24 +321,24 @@ export default function AnaSayfa() {
       </div>
 
       {/* KOYLAR */}
-      <div style={{ padding: '80px 24px', maxWidth: '1100px', margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: '56px' }}>
+      <div style={{ padding: '80px 20px', maxWidth: '1100px', margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
           <p style={{ color: '#0D7EA0', fontSize: '13px', letterSpacing: '0.2em', marginBottom: '12px' }}>KEŞFEDİN</p>
-          <h2 style={{ color: 'white', fontSize: '42px', fontWeight: 'bold', margin: '0 0 16px' }}>Göcek'in En Güzel Koyları</h2>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '17px', maxWidth: '480px', margin: '0 auto' }}>Hepsine sizi dakikalar içinde götürüyoruz</p>
+          <h2 className="section-title" style={{ color: 'white', fontSize: '38px', fontWeight: 'bold', margin: '0 0 14px' }}>Göcek'in En Güzel Koyları</h2>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '16px', maxWidth: '480px', margin: '0 auto' }}>Hepsine sizi dakikalar içinde götürüyoruz</p>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
+        <div className="koy-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '14px' }}>
           {KOYLAR.map((koy, i) => (
-            <div key={i} className="koy-card" onClick={handleRezervasyon} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '18px', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                <span style={{ fontSize: '32px' }}>{koy.emoji}</span>
+            <div key={i} className="koy-card" onClick={handleRezervasyon} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: '28px' }}>{koy.emoji}</span>
                 <div>
-                  <p style={{ color: 'white', fontWeight: 'bold', fontSize: '16px', margin: 0 }}>{koy.isim}</p>
-                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '4px 0 0' }}>Göcek'ten</p>
+                  <p style={{ color: 'white', fontWeight: 'bold', fontSize: '15px', margin: 0 }}>{koy.isim}</p>
+                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '3px 0 0' }}>Göcek'ten</p>
                 </div>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <p style={{ color: '#00c6ff', fontWeight: 'bold', fontSize: '18px', margin: 0 }}>{koy.sure}</p>
+                <p style={{ color: '#00c6ff', fontWeight: 'bold', fontSize: '17px', margin: 0 }}>{koy.sure}</p>
                 <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', margin: '2px 0 0' }}>uzaklıkta</p>
               </div>
             </div>
@@ -323,18 +346,66 @@ export default function AnaSayfa() {
         </div>
       </div>
 
+      {/* FİLOMUZ */}
+      <div style={{ padding: '80px 20px', maxWidth: '1100px', margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: '36px' }}>
+          <p style={{ color: '#0D7EA0', fontSize: '13px', letterSpacing: '0.2em', marginBottom: '12px' }}>FİLOMUZ</p>
+          <h2 className="section-title" style={{ color: 'white', fontSize: '38px', fontWeight: 'bold', margin: '0 0 14px' }}>Teknelerimizle Tanışın</h2>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '16px', maxWidth: '480px', margin: '0 auto' }}>Modern ve bakımlı filomuz her zaman hizmetinizde</p>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: '14px', marginBottom: '32px' }}>
+          {[
+            { emoji: '⛵', isim: 'Göcek I', kapasite: 12, durum: 'musait' },
+            { emoji: '🚤', isim: 'Göcek II', kapasite: 8, durum: 'musait' },
+            { emoji: '⛴️', isim: 'Göcek III', kapasite: 15, durum: 'mesgul' },
+            { emoji: '🛥️', isim: 'Göcek IV', kapasite: 10, durum: 'hizmetdisi' },
+          ].map((t, i) => (
+            <div key={i} className="koy-card" onClick={handleTekneler}
+              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '20px', display: 'flex', alignItems: 'center', gap: '14px', cursor: 'pointer' }}>
+              <div style={{
+                width: '52px', height: '52px', borderRadius: '13px', flexShrink: 0,
+                background: t.durum === 'musait' ? 'rgba(13,126,160,0.15)' : t.durum === 'mesgul' ? 'rgba(245,158,11,0.1)' : 'rgba(255,255,255,0.04)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '26px',
+                filter: t.durum === 'hizmetdisi' ? 'grayscale(0.7)' : 'none',
+              }}>
+                {t.emoji}
+              </div>
+              <div style={{ flex: 1 }}>
+                <p style={{ color: t.durum === 'hizmetdisi' ? 'rgba(255,255,255,0.4)' : 'white', fontWeight: 'bold', fontSize: '15px', margin: '0 0 4px' }}>{t.isim}</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', display: 'inline-block', background: t.durum === 'musait' ? '#22c55e' : t.durum === 'mesgul' ? '#f59e0b' : 'rgba(255,255,255,0.2)', boxShadow: t.durum === 'musait' ? '0 0 5px #22c55e' : t.durum === 'mesgul' ? '0 0 5px #f59e0b' : 'none' }} />
+                  <span style={{ color: t.durum === 'musait' ? '#4ade80' : t.durum === 'mesgul' ? '#fbbf24' : 'rgba(255,255,255,0.25)', fontSize: '12px' }}>
+                    {t.durum === 'musait' ? 'Müsait' : t.durum === 'mesgul' ? 'Seferde' : 'Hizmet Dışı'}
+                  </span>
+                  <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '11px', marginLeft: '4px' }}>· {t.kapasite} kişi</span>
+                </div>
+              </div>
+              <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '18px' }}>›</span>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ textAlign: 'center' }}>
+          <button onClick={handleTekneler} style={{ background: 'rgba(13,126,160,0.12)', border: '1px solid rgba(13,126,160,0.3)', color: '#00c6ff', padding: '12px 32px', borderRadius: '25px', fontSize: '15px', cursor: 'pointer', fontFamily: 'Georgia,serif', transition: 'all 0.2s' }}>
+            Tüm Tekneleri İncele →
+          </button>
+        </div>
+      </div>
+
       {/* ÖZELLİKLER */}
-      <div style={{ padding: '80px 24px', background: 'rgba(13,126,160,0.04)', borderTop: '1px solid rgba(13,126,160,0.1)', borderBottom: '1px solid rgba(13,126,160,0.1)' }}>
+      <div style={{ padding: '80px 20px', background: 'rgba(13,126,160,0.04)', borderTop: '1px solid rgba(13,126,160,0.1)', borderBottom: '1px solid rgba(13,126,160,0.1)' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '56px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '48px' }}>
             <p style={{ color: '#0D7EA0', fontSize: '13px', letterSpacing: '0.2em', marginBottom: '12px' }}>NEDEN BİZ?</p>
-            <h2 style={{ color: 'white', fontSize: '42px', fontWeight: 'bold', margin: 0 }}>Her Şey Düşünüldü</h2>
+            <h2 className="section-title" style={{ color: 'white', fontSize: '38px', fontWeight: 'bold', margin: 0 }}>Her Şey Düşünüldü</h2>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '20px' }}>
+          <div className="ozellik-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '18px' }}>
             {OZELLIKLER.map((oz, i) => (
-              <div key={i} className="ozellik-card" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '20px', padding: '28px 24px' }}>
-                <div style={{ fontSize: '36px', marginBottom: '16px' }}>{oz.icon}</div>
-                <h3 style={{ color: 'white', fontSize: '18px', fontWeight: 'bold', margin: '0 0 10px' }}>{oz.baslik}</h3>
+              <div key={i} className="ozellik-card" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '18px', padding: '26px 22px' }}>
+                <div style={{ fontSize: '34px', marginBottom: '14px' }}>{oz.icon}</div>
+                <h3 style={{ color: 'white', fontSize: '17px', fontWeight: 'bold', margin: '0 0 8px' }}>{oz.baslik}</h3>
                 <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '14px', lineHeight: '1.6', margin: 0 }}>{oz.aciklama}</p>
               </div>
             ))}
@@ -343,22 +414,22 @@ export default function AnaSayfa() {
       </div>
 
       {/* CTA */}
-      <div style={{ padding: '100px 24px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ padding: '90px 20px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 60% 60% at 50% 50%, rgba(13,126,160,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
         <div style={{ position: 'relative', zIndex: 1 }}>
-          <div className="float" style={{ fontSize: '64px', marginBottom: '24px' }}>⚓</div>
-          <h2 style={{ color: 'white', fontSize: '48px', fontWeight: 'bold', margin: '0 0 16px' }}>Hazır mısınız?</h2>
-          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '18px', margin: '0 0 40px' }}>İlk rezervasyonunuzu şimdi yapın</p>
-          <button onClick={handleRezervasyon} className="btn-primary" style={{ background: '#0D7EA0', border: 'none', color: 'white', padding: '18px 56px', borderRadius: '32px', fontSize: '18px', fontWeight: 'bold', boxShadow: '0 16px 48px rgba(13,126,160,0.5)', letterSpacing: '0.02em' }}>
+          <div className="float" style={{ fontSize: '56px', marginBottom: '20px' }}>⚓</div>
+          <h2 className="cta-title" style={{ color: 'white', fontSize: '44px', fontWeight: 'bold', margin: '0 0 14px' }}>Hazır mısınız?</h2>
+          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '17px', margin: '0 0 36px' }}>İlk rezervasyonunuzu şimdi yapın</p>
+          <button onClick={handleRezervasyon} className="btn-primary" style={{ background: '#0D7EA0', border: 'none', color: 'white', padding: '16px 48px', borderRadius: '32px', fontSize: '17px', fontWeight: 'bold', boxShadow: '0 16px 48px rgba(13,126,160,0.5)', letterSpacing: '0.02em' }}>
             Hemen Rezervasyon Yap →
           </button>
         </div>
       </div>
 
       {/* FOOTER */}
-      <footer style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '32px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+      <footer className="footer-inner" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '28px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span style={{ fontSize: '20px' }}>⚓</span>
+          <span style={{ fontSize: '18px' }}>⚓</span>
           <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px' }}>© 2026 Göcek Bot Taksi</span>
         </div>
         <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: '13px', margin: 0 }}>Göcek, Muğla · Türkiye</p>

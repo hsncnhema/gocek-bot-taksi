@@ -1,14 +1,104 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; padding: 0; }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/* ANA SAYFA ANİMASYONLAR */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(32px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes floatWave {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-12px); }
+}
+@keyframes shimmerText {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes ripple {
+  0%   { transform: scale(0.8); opacity: 0.6; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+@keyframes slideKoy {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes dropDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-html, body {
-  height: 100%;
-  font-family: 'Inter', sans-serif;
+/* FADE ANİMASYONLAR */
+.fade1 { animation: fadeUp 0.8s ease-out 0.1s both; }
+.fade2 { animation: fadeUp 0.8s ease-out 0.3s both; }
+.fade3 { animation: fadeUp 0.8s ease-out 0.5s both; }
+.fade4 { animation: fadeUp 0.8s ease-out 0.7s both; }
+.float { animation: floatWave 4s ease-in-out infinite; }
+
+/* SHIMMER METİN */
+.shimmer-text {
+  background: linear-gradient(90deg, #ffffff, #00c6ff, #ffffff, #0D7EA0, #ffffff);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmerText 5s ease-in-out infinite;
+}
+
+/* STAT SAYILAR */
+.stat-num {
+  background: linear-gradient(135deg, #00c6ff, #0D7EA0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* BUTONLAR */
+.btn-primary  { transition: all 0.25s; cursor: pointer; }
+.btn-primary:hover  { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(13,126,160,0.5) !important; }
+.btn-secondary { transition: all 0.25s; cursor: pointer; }
+.btn-secondary:hover { background: rgba(255,255,255,0.1) !important; transform: translateY(-2px); }
+
+/* KARTLAR */
+.koy-card { transition: all 0.2s; cursor: pointer; }
+.koy-card:hover { border-color: rgba(13,126,160,0.5) !important; transform: translateY(-4px); }
+.ozellik-card { transition: all 0.25s; }
+.ozellik-card:hover { transform: translateY(-6px); border-color: rgba(13,126,160,0.4) !important; }
+
+/* DROPDOWN */
+.dropdown { animation: dropDown 0.2s ease-out both; }
+.dropdown-item { transition: background 0.15s; cursor: pointer; }
+.dropdown-item:hover { background: rgba(255,255,255,0.08) !important; }
+
+/* AVATAR */
+.avatar-btn { transition: all 0.2s; cursor: pointer; }
+.avatar-btn:hover { transform: scale(1.05); box-shadow: 0 0 0 3px rgba(13,126,160,0.5) !important; }
+
+/* MOBİL - 768px */
+@media (max-width: 768px) {
+  .hero-title-sub  { font-size: 28px !important; }
+  .hero-title-main { font-size: 52px !important; }
+  .hero-desc       { font-size: 16px !important; }
+  .hero-btns       { flex-direction: column !important; align-items: center !important; }
+  .hero-btns button { width: 100% !important; max-width: 320px !important; }
+  .hero-stats       { gap: 20px !important; }
+  .hero-stats > div { min-width: 70px !important; }
+  .nav-inner        { padding: 12px 16px !important; }
+  .nav-logo-text    { font-size: 15px !important; }
+  .nav-logo-sub     { display: none !important; }
+  .koy-grid         { grid-template-columns: 1fr !important; }
+  .ozellik-grid     { grid-template-columns: repeat(2, 1fr) !important; }
+  .section-title    { font-size: 28px !important; }
+  .cta-title        { font-size: 32px !important; }
+  .footer-inner     { flex-direction: column !important; text-align: center !important; }
+  .avatar-name      { display: none !important; }
+  .koy-indicator    { flex-direction: column !important; gap: 8px !important; padding: 12px 16px !important; }
+}
+
+/* MOBİL - 480px */
+@media (max-width: 480px) {
+  .hero-title-sub  { font-size: 22px !important; }
+  .hero-title-main { font-size: 40px !important; }
+  .ozellik-grid    { grid-template-columns: 1fr !important; }
+  .hero-stats      { gap: 12px !important; }
 }
