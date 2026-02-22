@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useMemo } from 'react'
+import { useEffect, useRef, useState, useMemo, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 import DumenLoading from '../../components/LoadingSpinner'
@@ -449,7 +449,7 @@ function TekneKart({ tekne, durum, aciklama, secili, detayAcik, onSec, onDetayTo
 }
 
 // ─── Ana bileşen ──────────────────────────────────────────────
-export default function RezervasyonPage() {
+function RezervasyonContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { lang, setLang, t } = useLang()
@@ -983,5 +983,13 @@ export default function RezervasyonPage() {
 
       </div>
     </div>
+  )
+}
+
+export default function RezervasyonPage() {
+  return (
+    <Suspense>
+      <RezervasyonContent />
+    </Suspense>
   )
 }
