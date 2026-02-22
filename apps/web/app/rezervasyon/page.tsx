@@ -13,74 +13,22 @@ const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-// ─── Nokta veritabanı ────────────────────────────────────────
-const TUM_NOKTALAR = [
-  { id: 'skopea',        isim: 'Skopea İskelesi',  lat: 36.7550, lng: 28.9200, tip: 'boarding' },
-  { id: 'mucev',         isim: 'Muçev İskelesi',    lat: 36.7620, lng: 28.9350, tip: 'boarding' },
-  { id: 'tersane',       isim: 'Tersane Koyu',      lat: 36.7850, lng: 28.9100, tip: 'koy' },
-  { id: 'akvaryum',      isim: 'Akvaryum Koyu',     lat: 36.7900, lng: 28.8950, tip: 'koy' },
-  { id: 'yassica',       isim: 'Yassıca Adası',     lat: 36.7750, lng: 28.8800, tip: 'koy' },
-  { id: 'gocek_adasi',   isim: 'Göcek Adası',       lat: 36.7680, lng: 28.9050, tip: 'koy' },
-  { id: 'domuz',         isim: 'Domuz Adası',       lat: 36.7720, lng: 28.8700, tip: 'koy' },
-  { id: 'boynuz',        isim: 'Boynuz Bükü',       lat: 36.7450, lng: 28.8600, tip: 'koy' },
-  { id: 'at_buku',       isim: 'At Bükü',           lat: 36.7380, lng: 28.8750, tip: 'koy' },
-  { id: 'sirali',        isim: 'Sıralı Bük',        lat: 36.7320, lng: 28.8900, tip: 'koy' },
-  { id: 'kille',         isim: 'Kille Koyu',        lat: 36.7280, lng: 28.9100, tip: 'koy' },
-  { id: 'bedri',         isim: 'Bedri Rahmi Koyu',  lat: 36.7200, lng: 28.9300, tip: 'koy' },
-  { id: 'buyuk_sarsala', isim: 'Büyük Sarsala',     lat: 36.7150, lng: 28.9500, tip: 'koy' },
-  { id: 'kucuk_sarsala', isim: 'Küçük Sarsala',     lat: 36.7180, lng: 28.9650, tip: 'koy' },
-  { id: 'buyukova',      isim: 'Büyükova Koyu',     lat: 36.7100, lng: 28.9800, tip: 'koy' },
-  { id: 'hamam',         isim: 'Hamam Koyu',        lat: 36.8050, lng: 28.8900, tip: 'koy' },
-  { id: 'marti',         isim: 'Martı Koyu',        lat: 36.8100, lng: 28.8750, tip: 'koy' },
-  { id: 'binlik',        isim: 'Binlik Koyu',       lat: 36.8150, lng: 28.8600, tip: 'koy' },
-  { id: 'merdivenli',    isim: 'Merdivenli Koyu',   lat: 36.8200, lng: 28.8450, tip: 'koy' },
-  { id: 'gobun',         isim: 'Göbün Koyu',        lat: 36.8250, lng: 28.8300, tip: 'koy' },
-  { id: 'osmanaga',      isim: 'Osmanağa Koyu',     lat: 36.7600, lng: 28.8500, tip: 'koy' },
-  { id: 'ayten',         isim: 'Ayten Koyu',        lat: 36.7520, lng: 28.8350, tip: 'koy' },
-]
-
-// ─── Tekne veritabanı (gerçekte Supabase'den gelecek) ────────
-const TEKNELER = [
-  {
-    id: 'bot1', isim: 'Göcek I', kapasite: 12, model: 'Ribeye 750', emoji: '⛵',
-    durumSimdi: 'musait' as const,
-    ozellikler: ['Gölgelik', 'Yüzme merdiveni', 'Bluetooth'],
-    hizmetDisiNeden: null,
-    sefer: null,
-  },
-  {
-    id: 'bot2', isim: 'Göcek II', kapasite: 8, model: 'Ranieri 585', emoji: '🚤',
-    durumSimdi: 'musait' as const,
-    ozellikler: ['Hızlı tekne', 'Müzik sistemi', 'Soğutma'],
-    hizmetDisiNeden: null,
-    sefer: null,
-  },
-  {
-    id: 'bot3', isim: 'Göcek III', kapasite: 15, model: 'Lomac 700 TT', emoji: '⛴️',
-    durumSimdi: 'mesgul' as const,
-    ozellikler: ['Büyük platform', 'Gölgelik', 'WC'],
-    hizmetDisiNeden: null,
-    sefer: {
-      neyden: 'Skopea İskelesi', nereye: 'Tersane Koyu',
-      yolcuSayisi: 6, bitisZaman: '14:35',
-      tahminiMusait: '14:50', tahminiBinis: '15:05',
-      ilerleme: 65,
-    },
-  },
-  {
-    id: 'bot4', isim: 'Göcek IV', kapasite: 10, model: 'Joker Coaster 580', emoji: '🛥️',
-    durumSimdi: 'hizmetdisi' as const,
-    ozellikler: ['Gölgelik', 'Soğutma'],
-    hizmetDisiNeden: 'Bakım & onarım',
-    sefer: null,
-  },
-]
+// ─── Tipler ──────────────────────────────────────────────────
+interface TekneRez {
+  id: string; isim: string; kapasite: number; model: string; emoji: string
+  durumSimdi: 'musait' | 'mesgul' | 'hizmetdisi'
+  ozellikler: string[]; hizmetDisiNeden: string | null
+  sefer: {
+    neyden: string; nereye: string; yolcuSayisi: number
+    bitisZaman: string; tahminiMusait: string; tahminiBinis: string; ilerleme: number
+  } | null
+}
 
 type TekneMusaitlik = 'musait' | 'mesgul' | 'hizmetdisi' | 'kapasiteyetersiz' | 'dolu'
 
 // ─── Müsaitlik hesaplayıcı ────────────────────────────────────
 function hesaplaMusaitlik(
-  tekne: typeof TEKNELER[0],
+  tekne: TekneRez,
   zamanMode: 'simdi' | 'planli' | null,
   yolcuSayisi: number,
 ): { durum: TekneMusaitlik; aciklama: string } {
@@ -159,9 +107,10 @@ interface HaritaProps {
   onSelect: (n: Nokta) => void
   selectedId?: string | null
   allowCustom?: boolean
+  noktalar: Nokta[]
 }
 
-function Harita({ active, onSelect, selectedId, allowCustom = false }: HaritaProps) {
+function Harita({ active, onSelect, selectedId, allowCustom = false, noktalar }: HaritaProps) {
   const mapRef = useRef<any>(null)
   const markerMap = useRef<Map<string, { container: HTMLDivElement; icon: HTMLDivElement; label: HTMLDivElement; marker: any; nokta: Nokta }>>(new Map())
   const customMarkerRef = useRef<any>(null)
@@ -169,6 +118,7 @@ function Harita({ active, onSelect, selectedId, allowCustom = false }: HaritaPro
   const userLocRef = useRef<{ lng: number; lat: number } | null>(null)
   const [loaded, setLoaded] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const mapboxglRef = useRef<any>(null)
 
   useEffect(() => {
     if (!active || !containerRef.current || mapRef.current) return
@@ -177,6 +127,7 @@ function Harita({ active, onSelect, selectedId, allowCustom = false }: HaritaPro
 
     import('mapbox-gl').then(({ default: mapboxgl }) => {
       if (!mounted || !containerRef.current) return
+      mapboxglRef.current = mapboxgl
       mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!
       map = new mapboxgl.Map({
         container: containerRef.current,
@@ -201,64 +152,6 @@ function Harita({ active, onSelect, selectedId, allowCustom = false }: HaritaPro
             new mapboxgl.Marker({ element: dot, anchor: 'center' }).setLngLat([coords.longitude, coords.latitude]).addTo(map)
           }, () => {})
         }
-
-        // Noktaları ekle
-        TUM_NOKTALAR.forEach((nokta) => {
-          const sel = nokta.id === selectedId
-          const isB = nokta.tip === 'boarding'   // forEach içi scope
-          const container = createMarkerEl(nokta, sel)
-
-          // Referanslar için iç elementleri bul
-          const icon = container.children[0] as HTMLDivElement
-          const label = container.children[1] as HTMLDivElement
-
-          container.addEventListener('click', (e) => {
-            e.stopPropagation()
-            pinHitRef.current = true
-            setTimeout(() => { pinHitRef.current = false }, 100)
-            if (customMarkerRef.current) { customMarkerRef.current.remove(); customMarkerRef.current = null }
-
-            // Tüm marker'ları sıfırla
-            markerMap.current.forEach(({ icon: ic, label: lb, nokta: n2 }) => {
-              const ib = n2.tip === 'boarding'
-              ic.style.background = ib ? 'rgba(13,126,160,0.85)' : 'rgba(8,24,50,0.9)'
-              ic.style.border = ib ? '2px solid #00c6ff' : '2px solid rgba(255,255,255,0.5)'
-              ic.style.boxShadow = '0 2px 8px rgba(0,0,0,0.6)'
-              lb.style.color = 'rgba(255,255,255,0.85)'
-              lb.style.fontWeight = '600'
-              lb.style.border = '1px solid rgba(255,255,255,0.1)'
-              lb.style.boxShadow = 'none'
-            })
-
-            // Bu marker'ı seç
-            icon.style.background = isB ? '#0D7EA0' : '#1a3a5c'
-            icon.style.border = '3px solid #fff'
-            icon.style.boxShadow = '0 0 0 4px rgba(0,198,255,0.4), 0 4px 12px rgba(0,0,0,0.7)'
-            label.style.color = '#00c6ff'
-            label.style.fontWeight = 'bold'
-            label.style.border = '1px solid rgba(0,198,255,0.5)'
-            label.style.boxShadow = '0 0 8px rgba(0,198,255,0.3)'
-
-            onSelect(nokta)
-          })
-
-          // Hover
-          container.addEventListener('mouseenter', () => {
-            if (nokta.id !== selectedId) {
-              icon.style.boxShadow = '0 0 0 3px rgba(13,126,160,0.35), 0 2px 8px rgba(0,0,0,0.6)'
-              icon.style.transform = 'scale(1.1)'
-            }
-          })
-          container.addEventListener('mouseleave', () => {
-            icon.style.transform = 'scale(1)'
-            if (nokta.id !== selectedId) icon.style.boxShadow = '0 2px 8px rgba(0,0,0,0.6)'
-          })
-
-          const marker = new mapboxgl.Marker({ element: container, anchor: 'top' })
-            .setLngLat([nokta.lng, nokta.lat]).addTo(map)
-
-          markerMap.current.set(nokta.id, { container, icon, label, marker, nokta })
-        })
 
         // Haritaya tıklama — özel nokta
         if (allowCustom) {
@@ -304,6 +197,73 @@ function Harita({ active, onSelect, selectedId, allowCustom = false }: HaritaPro
     }
   }, [active]) // eslint-disable-line
 
+  // Noktalar Supabase'den geç gelirse haritaya ekle
+  useEffect(() => {
+    if (!loaded || !mapRef.current || !mapboxglRef.current || noktalar.length === 0) return
+    const mapboxgl = mapboxglRef.current
+
+    noktalar.forEach((nokta) => {
+      const existing = markerMap.current.get(nokta.id)
+      if (existing) {
+        // Koordinat değiştiyse marker'ı taşı
+        if (existing.nokta.lat !== nokta.lat || existing.nokta.lng !== nokta.lng) {
+          existing.marker.setLngLat([nokta.lng, nokta.lat])
+          markerMap.current.set(nokta.id, { ...existing, nokta })
+        }
+        return
+      }
+
+      const sel = nokta.id === selectedId
+      const isB = nokta.tip === 'boarding'
+      const container = createMarkerEl(nokta, sel)
+      const icon = container.children[0] as HTMLDivElement
+      const label = container.children[1] as HTMLDivElement
+
+      container.addEventListener('click', (e) => {
+        e.stopPropagation()
+        pinHitRef.current = true
+        setTimeout(() => { pinHitRef.current = false }, 100)
+        if (customMarkerRef.current) { customMarkerRef.current.remove(); customMarkerRef.current = null }
+
+        markerMap.current.forEach(({ icon: ic, label: lb, nokta: n2 }) => {
+          const ib = n2.tip === 'boarding'
+          ic.style.background = ib ? 'rgba(13,126,160,0.85)' : 'rgba(8,24,50,0.9)'
+          ic.style.border = ib ? '2px solid #00c6ff' : '2px solid rgba(255,255,255,0.5)'
+          ic.style.boxShadow = '0 2px 8px rgba(0,0,0,0.6)'
+          lb.style.color = 'rgba(255,255,255,0.85)'
+          lb.style.fontWeight = '600'
+          lb.style.border = '1px solid rgba(255,255,255,0.1)'
+          lb.style.boxShadow = 'none'
+        })
+
+        icon.style.background = isB ? '#0D7EA0' : '#1a3a5c'
+        icon.style.border = '3px solid #fff'
+        icon.style.boxShadow = '0 0 0 4px rgba(0,198,255,0.4), 0 4px 12px rgba(0,0,0,0.7)'
+        label.style.color = '#00c6ff'
+        label.style.fontWeight = 'bold'
+        label.style.border = '1px solid rgba(0,198,255,0.5)'
+        label.style.boxShadow = '0 0 8px rgba(0,198,255,0.3)'
+        onSelect(nokta)
+      })
+
+      container.addEventListener('mouseenter', () => {
+        if (nokta.id !== selectedId) {
+          icon.style.boxShadow = '0 0 0 3px rgba(13,126,160,0.35), 0 2px 8px rgba(0,0,0,0.6)'
+          icon.style.transform = 'scale(1.1)'
+        }
+      })
+      container.addEventListener('mouseleave', () => {
+        icon.style.transform = 'scale(1)'
+        if (nokta.id !== selectedId) icon.style.boxShadow = '0 2px 8px rgba(0,0,0,0.6)'
+      })
+
+      const marker = new mapboxgl.Marker({ element: container, anchor: 'top' })
+        .setLngLat([nokta.lng, nokta.lat]).addTo(mapRef.current)
+
+      markerMap.current.set(nokta.id, { container, icon, label, marker, nokta })
+    })
+  }, [noktalar, loaded]) // eslint-disable-line
+
   return (
     <div style={{ position: 'relative', marginBottom: '14px' }}>
       <div ref={containerRef} className="map-box" style={{ width: '100%', height: '360px', borderRadius: '14px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }} />
@@ -339,7 +299,7 @@ function Harita({ active, onSelect, selectedId, allowCustom = false }: HaritaPro
 
 // ─── Tekne kartı (birleşik adımda) ───────────────────────────
 function TekneKart({ tekne, durum, aciklama, secili, detayAcik, onSec, onDetayToggle }: {
-  tekne: typeof TEKNELER[0]
+  tekne: TekneRez
   durum: TekneMusaitlik
   aciklama: string
   secili: boolean
@@ -484,13 +444,43 @@ export default function RezervasyonPage() {
   const [step, setStep] = useState<Step>('binis')
   const [user, setUser] = useState<any>(null)
   const [telefon, setTelefon] = useState('')
+  const [noktalar, setNoktalar] = useState<Nokta[]>([])
+  const [teknelerRez, setTeknelerRez] = useState<TekneRez[]>([])
 
   useEffect(() => {
+    // Auth dinleyici
     supabase.auth.getUser().then(({ data }) => setUser(data.user))
     const { data: listener } = supabase.auth.onAuthStateChange((_e, session) => {
       setUser(session?.user ?? null)
     })
-    return () => listener.subscription.unsubscribe()
+    // Supabase'den noktalar + tekneler yükle
+    const fetchVeri = () => Promise.all([
+      supabase.from('noktalar').select('*').order('created_at'),
+      supabase.from('tekneler').select('*').order('sira'),
+    ]).then(([{ data: nkt }, { data: tkn }]) => {
+      if (nkt) setNoktalar(nkt as Nokta[])
+      if (tkn) setTeknelerRez(tkn.map((t: any) => ({
+        id: t.id, isim: t.isim, kapasite: t.kapasite, model: t.model, emoji: t.emoji,
+        durumSimdi: t.durum as 'musait' | 'mesgul' | 'hizmetdisi',
+        ozellikler: t.ozellikler ?? [], hizmetDisiNeden: null, sefer: null,
+      })))
+    })
+    fetchVeri()
+
+    // Realtime: noktalar değişince otomatik güncelle
+    const channel = supabase
+      .channel('noktalar-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'noktalar' }, () => {
+        supabase.from('noktalar').select('*').order('created_at').then(({ data }) => {
+          if (data) setNoktalar(data as Nokta[])
+        })
+      })
+      .subscribe()
+
+    return () => {
+      listener.subscription.unsubscribe()
+      supabase.removeChannel(channel)
+    }
   }, [])
   const [binisNokta, setBinisNokta] = useState<Nokta | null>(null)
   const [inisNokta, setInisNokta] = useState<Nokta | null>(null)
@@ -536,8 +526,8 @@ export default function RezervasyonPage() {
 
   // Hesaplanan müsaitlik listesi
   const tekneMusaitlikleri = useMemo(() =>
-    TEKNELER.map(t => ({ tekne: t, ...hesaplaMusaitlik(t, zamanMode, yolcuSayisi) })),
-    [zamanMode, yolcuSayisi]
+    teknelerRez.map(t => ({ tekne: t, ...hesaplaMusaitlik(t, zamanMode, yolcuSayisi) })),
+    [teknelerRez, zamanMode, yolcuSayisi]
   )
 
   const musaitSayisi = tekneMusaitlikleri.filter(t => t.durum === 'musait').length
@@ -556,7 +546,7 @@ export default function RezervasyonPage() {
   function whatsappUrl() {
     const b = binisNokta?.isim ?? '?'
     const i = inisNokta?.tip === 'custom' ? `Özel konum (${inisNokta?.lat?.toFixed(4)}, ${inisNokta?.lng?.toFixed(4)})` : inisNokta?.isim ?? '?'
-    const t = seciliTekne ? TEKNELER.find(x => x.id === seciliTekne)?.isim ?? '' : ''
+    const t = seciliTekne ? teknelerRez.find(x => x.id === seciliTekne)?.isim ?? '' : ''
     const msg = `Merhaba! Bot Taksi rezervasyonu yapmak istiyorum.\n\n⚓ Biniş: ${b}\n📍 İniş: ${i}\n👥 Yolcu: ${yolcuSayisi}\n🕐 Zaman: ${zamanEtiketi()}${t ? `\n⛵ Tekne: ${t}` : ''}\n\nFiyat bilgisi alabilir miyim?`
     return `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`
   }
@@ -651,7 +641,7 @@ export default function RezervasyonPage() {
             <p style={{ color: '#0D7EA0', fontSize: '12px', letterSpacing: '0.15em', marginBottom: '5px' }}>ADIM 1</p>
             <h2 style={{ fontSize: '22px', fontWeight: 'bold', margin: '0 0 4px' }}>Nereden bineceksiniz?</h2>
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', margin: '0 0 14px' }}>İskele veya koya tıklayın</p>
-            <Harita active={step === 'binis'} onSelect={setBinisNokta} selectedId={binisNokta?.id} allowCustom={true} />
+            <Harita active={step === 'binis'} onSelect={setBinisNokta} selectedId={binisNokta?.id} allowCustom={true} noktalar={noktalar} />
             {binisNokta ? <SecilenKart nokta={binisNokta} /> : (
               <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '13px 16px', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
                 <span>👆</span><p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '14px', margin: 0 }}>Haritada bir nokta seçin</p>
@@ -683,7 +673,7 @@ export default function RezervasyonPage() {
             <p style={{ color: '#0D7EA0', fontSize: '12px', letterSpacing: '0.15em', marginBottom: '5px' }}>ADIM 2</p>
             <h2 style={{ fontSize: '22px', fontWeight: 'bold', margin: '0 0 4px' }}>Nereye gideceksiniz?</h2>
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', margin: '0 0 14px' }}>Biniş: <span style={{ color: '#00c6ff' }}>⚓ {binisNokta?.isim}</span></p>
-            <Harita active={step === 'inis'} onSelect={setInisNokta} selectedId={inisNokta?.id} allowCustom={true} />
+            <Harita active={step === 'inis'} onSelect={setInisNokta} selectedId={inisNokta?.id} allowCustom={true} noktalar={noktalar} />
             {inisNokta ? <SecilenKart nokta={inisNokta} /> : (
               <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '13px 16px', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
                 <span>👆</span><p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '14px', margin: 0 }}>Haritada bir nokta seçin</p>
@@ -902,7 +892,7 @@ export default function RezervasyonPage() {
                 ['📍 İniş', inisAdi],
                 ['👥 Yolcu', `${yolcuSayisi} kişi`],
                 ['🕐 Zaman', zamanEtiketi()],
-                ['⛵ Tekne', TEKNELER.find(t => t.id === seciliTekne)?.isim ?? '-'],
+                ['⛵ Tekne', teknelerRez.find(t => t.id === seciliTekne)?.isim ?? '-'],
               ] as [string, string][]).map(([k, v]) => (
                 <div key={k} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                   <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: '14px' }}>{k}</span>
