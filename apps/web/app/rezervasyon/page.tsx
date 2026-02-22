@@ -118,6 +118,7 @@ function Harita({ active, onSelect, selectedId, allowCustom = false, noktalar, f
   const containerRef = useRef<HTMLDivElement>(null)
   const mapboxglRef = useRef<any>(null)
   const flyToOnLoadRef = useRef(flyToOnLoad)
+  const initialCenteredRef = useRef(false)
 
   // Her render'da ref'leri güncelle (stale closure önlemi)
   useEffect(() => { tRef.current = t })
@@ -136,6 +137,7 @@ function Harita({ active, onSelect, selectedId, allowCustom = false, noktalar, f
 
   useEffect(() => {
     if (!active || !containerRef.current || mapRef.current) return
+    initialCenteredRef.current = false
     let map: any
     let mounted = true
 
@@ -278,6 +280,18 @@ function Harita({ active, onSelect, selectedId, allowCustom = false, noktalar, f
 
       markerMap.current.set(nokta.id, { container, icon, label, marker, nokta })
     })
+
+    // Supabase'den gelen gerçek koordinatlara göre merkezi ayarla
+    if (!initialCenteredRef.current && !flyToOnLoadRef.current && mapRef.current) {
+      const skopeaNokta =
+        noktalar.find(n => n.isim?.toLowerCase().includes('skopea')) ??
+        noktalar.find(n => n.tip === 'boarding') ??
+        noktalar[0]
+      if (skopeaNokta) {
+        mapRef.current.flyTo({ center: [skopeaNokta.lng, skopeaNokta.lat], zoom: 14, duration: 600 })
+      }
+      initialCenteredRef.current = true
+    }
   }, [noktalar, loaded]) // eslint-disable-line
 
   return (
