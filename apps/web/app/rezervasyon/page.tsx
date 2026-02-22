@@ -2,10 +2,16 @@
 
 import { useEffect, useRef, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
+import { createBrowserClient } from '@supabase/ssr'
 import DumenLoading from '../../components/LoadingSpinner'
 
 const WHATSAPP = '905323456809'
 const TEL = '+905323456809'
+
+const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 // ─── Nokta veritabanı ────────────────────────────────────────
 const TUM_NOKTALAR = [
@@ -160,6 +166,7 @@ function Harita({ active, onSelect, selectedId, allowCustom = false }: HaritaPro
   const markerMap = useRef<Map<string, { container: HTMLDivElement; icon: HTMLDivElement; label: HTMLDivElement; marker: any; nokta: Nokta }>>(new Map())
   const customMarkerRef = useRef<any>(null)
   const pinHitRef = useRef(false)
+  const userLocRef = useRef<{ lng: number; lat: number } | null>(null)
   const [loaded, setLoaded] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -187,6 +194,8 @@ function Harita({ active, onSelect, selectedId, allowCustom = false }: HaritaPro
         // Kullanıcı konumu
         if (navigator.geolocation) {
           navigator.geolocation.getCurrentPosition(({ coords }) => {
+            userLocRef.current = { lng: coords.longitude, lat: coords.latitude }
+            map.flyTo({ center: [coords.longitude, coords.latitude], zoom: 14, duration: 1400 })
             const dot = document.createElement('div')
             dot.style.cssText = 'width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid #0D7EA0;box-shadow:0 0 0 4px rgba(13,126,160,0.2)'
             new mapboxgl.Marker({ element: dot, anchor: 'center' }).setLngLat([coords.longitude, coords.latitude]).addTo(map)
@@ -310,6 +319,19 @@ function Harita({ active, onSelect, selectedId, allowCustom = false }: HaritaPro
         <div style={{ position: 'absolute', bottom: '42px', left: '12px', zIndex: 5, background: 'rgba(5,14,29,0.88)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', padding: '5px 10px', fontSize: '11px', color: 'rgba(255,255,255,0.55)', backdropFilter: 'blur(8px)', fontFamily: 'Georgia,serif', pointerEvents: 'none' }}>
           ⚓ Koy seçin veya haritaya tıklayarak özel nokta
         </div>
+      )}
+      {loaded && (
+        <button
+          onClick={() => {
+            if (userLocRef.current && mapRef.current) {
+              mapRef.current.flyTo({ center: [userLocRef.current.lng, userLocRef.current.lat], zoom: 14, duration: 1000 })
+            }
+          }}
+          title="Konumuma git"
+          style={{ position: 'absolute', bottom: '42px', right: '10px', zIndex: 5, width: '36px', height: '36px', borderRadius: '8px', background: 'rgba(5,14,29,0.92)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', fontSize: '17px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.5)' }}
+        >
+          📍
+        </button>
       )}
     </div>
   )
@@ -460,6 +482,16 @@ export default function RezervasyonPage() {
   const router = useRouter()
   const [pageLoading, setPageLoading] = useState(false)
   const [step, setStep] = useState<Step>('binis')
+  const [user, setUser] = useState<any>(null)
+  const [telefon, setTelefon] = useState('')
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUser(data.user))
+    const { data: listener } = supabase.auth.onAuthStateChange((_e, session) => {
+      setUser(session?.user ?? null)
+    })
+    return () => listener.subscription.unsubscribe()
+  }, [])
   const [binisNokta, setBinisNokta] = useState<Nokta | null>(null)
   const [inisNokta, setInisNokta] = useState<Nokta | null>(null)
   const [yolcuSayisi, setYolcuSayisi] = useState(1)
@@ -619,7 +651,7 @@ export default function RezervasyonPage() {
             <p style={{ color: '#0D7EA0', fontSize: '12px', letterSpacing: '0.15em', marginBottom: '5px' }}>ADIM 1</p>
             <h2 style={{ fontSize: '22px', fontWeight: 'bold', margin: '0 0 4px' }}>Nereden bineceksiniz?</h2>
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', margin: '0 0 14px' }}>İskele veya koya tıklayın</p>
-            <Harita active={step === 'binis'} onSelect={setBinisNokta} selectedId={binisNokta?.id} />
+            <Harita active={step === 'binis'} onSelect={setBinisNokta} selectedId={binisNokta?.id} allowCustom={true} />
             {binisNokta ? <SecilenKart nokta={binisNokta} /> : (
               <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '13px 16px', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
                 <span>👆</span><p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '14px', margin: 0 }}>Haritada bir nokta seçin</p>
@@ -887,19 +919,41 @@ export default function RezervasyonPage() {
               </div>
             </div>
 
+            {user && (
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ color: 'rgba(255,255,255,0.5)', fontSize: '11px', letterSpacing: '0.12em', display: 'block', marginBottom: '8px' }}>TELEFON NUMARANIZ</label>
+                <input
+                  type="tel"
+                  value={telefon}
+                  onChange={e => setTelefon(e.target.value)}
+                  placeholder="+90 5xx xxx xx xx"
+                  style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.15)', color: 'white', fontSize: '15px', boxSizing: 'border-box', fontFamily: 'Georgia,serif', outline: 'none' }}
+                />
+                <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '12px', margin: '6px 0 0' }}>
+                  📞 Konumunuza geldiğinde kaptanımız sizi arayacak
+                </p>
+              </div>
+            )}
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <button onClick={() => alert('Supabase entegrasyonu yakında aktif!')}
-                style={{ width: '100%', padding: '15px', background: '#0D7EA0', color: 'white', border: 'none', borderRadius: '11px', fontSize: '15px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                ✅ Rezervasyonu Onayla
-              </button>
+              {user && (
+                <button onClick={() => alert('Supabase entegrasyonu yakında aktif!')}
+                  style={{ width: '100%', padding: '15px', background: '#0D7EA0', color: 'white', border: 'none', borderRadius: '11px', fontSize: '15px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                  ✅ Rezervasyonu Onayla
+                </button>
+              )}
               <a href={whatsappUrl()} target="_blank" rel="noreferrer"
                 style={{ width: '100%', padding: '14px', background: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.3)', color: '#25d366', borderRadius: '11px', fontSize: '15px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', textDecoration: 'none' }}>
                 💬 WhatsApp ile Rezervasyon
               </a>
-              <a href={`tel:${TEL}`}
-                style={{ width: '100%', padding: '13px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)', borderRadius: '11px', fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', textDecoration: 'none' }}>
-                📞 Telefonla Ara
-              </a>
+              {!user && (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px 16px', background: 'rgba(13,126,160,0.06)', border: '1px solid rgba(13,126,160,0.2)', borderRadius: '11px' }}>
+                  <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px' }}>Online rezervasyon için</span>
+                  <button onClick={() => navigate('/giris')} style={{ background: 'none', border: 'none', color: '#00c6ff', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer', padding: 0, fontFamily: 'Georgia,serif' }}>
+                    giriş yapın →
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}

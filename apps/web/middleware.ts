@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
 // Giriş gerektiren rotalar
-const PROTECTED_ROUTES = ['/rezervasyon', '/profil', '/gecmis']
+const PROTECTED_ROUTES = ['/profil', '/gecmis']
 // Sadece belirli rollere açık rotalar
 const ROLE_ROUTES: Record<string, string[]> = {
   '/api/dispatcher': ['dispatcher', 'admin'],
