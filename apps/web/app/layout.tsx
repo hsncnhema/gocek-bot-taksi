@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import './globals.css'
+import { LangProvider } from '../components/LangProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -17,7 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="tr">
       <body className={inter.className}>
-        {children}
+        <LangProvider>{children}</LangProvider>
       </body>
     </html>
   )

@@ -3,6 +3,7 @@
 import { useRouter, useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
+import { useLang } from '../../../components/LangProvider'
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -32,6 +33,7 @@ export default function TekneDetayPage() {
   const router = useRouter()
   const params = useParams()
   const id = params?.id as string
+  const { lang, setLang, t } = useLang()
 
   const [tekne, setTekne] = useState<Tekne | null>(null)
   const [yukleniyor, setYukleniyor] = useState(true)
@@ -66,8 +68,8 @@ export default function TekneDetayPage() {
       <div style={{ minHeight: '100vh', background: '#050e1d', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontFamily: 'Georgia,serif' }}>
         <div style={{ textAlign: 'center' }}>
           <p style={{ fontSize: '48px', margin: '0 0 12px' }}>⚓</p>
-          <p style={{ color: 'rgba(255,255,255,0.5)' }}>Tekne bulunamadı</p>
-          <button onClick={() => router.back()} style={{ marginTop: '16px', padding: '10px 24px', background: '#0D7EA0', border: 'none', borderRadius: '10px', color: 'white', cursor: 'pointer', fontFamily: 'Georgia,serif' }}>← Geri</button>
+          <p style={{ color: 'rgba(255,255,255,0.5)' }}>{t('Tekne bulunamadı', 'Boat not found')}</p>
+          <button onClick={() => router.back()} style={{ marginTop: '16px', padding: '10px 24px', background: '#0D7EA0', border: 'none', borderRadius: '10px', color: 'white', cursor: 'pointer', fontFamily: 'Georgia,serif' }}>← {t('Geri', 'Back')}</button>
         </div>
       </div>
     )
@@ -121,19 +123,21 @@ export default function TekneDetayPage() {
 
       {/* NAV */}
       <nav style={{ position: 'sticky', top: 0, zIndex: 200, background: 'rgba(5,14,29,0.97)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '12px 20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <button onClick={() => router.back()} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.55)', cursor: 'pointer', fontSize: '14px', padding: '4px 0' }}>← Tekneler</button>
+        <button onClick={() => router.back()} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.55)', cursor: 'pointer', fontSize: '14px', padding: '4px 0' }}>← {t('Tekneler', 'Fleet')}</button>
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
           <span style={{ fontSize: '16px' }}>{tekne.emoji}</span>
           <span style={{ color: 'white', fontWeight: 'bold', fontSize: '15px' }}>{tekne.isim}</span>
         </div>
-        <div style={{ width: '64px' }} />
+        <button onClick={() => setLang(lang === 'tr' ? 'en' : 'tr')}
+          style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.7)', padding: '6px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer', fontFamily: 'Georgia,serif', letterSpacing: '0.05em' }}>
+          {lang === 'tr' ? '🇬🇧 EN' : '🇹🇷 TR'}
+        </button>
       </nav>
 
       <div style={{ maxWidth: '640px', margin: '0 auto', padding: '0 20px 60px' }}>
 
         {/* ── 3D HERO BÖLÜMÜ ── */}
         <div style={{ position: 'relative', marginBottom: '28px', overflow: 'hidden' }}>
-          {/* Arka plan glow */}
           <div style={{
             position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
             width: '280px', height: '280px', borderRadius: '50%',
@@ -142,7 +146,6 @@ export default function TekneDetayPage() {
             pointerEvents: 'none',
           }} />
 
-          {/* Deniz dalgaları */}
           <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '60px', overflow: 'hidden', opacity: musait ? 0.4 : 0.1 }}>
             <div style={{ position: 'absolute', bottom: 0, left: 0, width: '200%', height: '100%', animation: 'waveAnim 4s linear infinite' }}>
               <svg viewBox="0 0 1440 60" preserveAspectRatio="none" style={{ width: '50%', height: '100%', display: 'inline-block' }}>
@@ -154,7 +157,6 @@ export default function TekneDetayPage() {
             </div>
           </div>
 
-          {/* 3D Tekne */}
           <div
             style={{ padding: '48px 0 72px', display: 'flex', justifyContent: 'center', perspective: '600px', cursor: musait ? 'grab' : 'default' }}
             onMouseEnter={() => { if (musait) setIsHovering(true) }}
@@ -176,7 +178,6 @@ export default function TekneDetayPage() {
             </div>
           </div>
 
-          {/* Shimmer overlay — only when musait */}
           {musait && (
             <div style={{
               position: 'absolute', top: '50%', left: '50%',
@@ -191,7 +192,7 @@ export default function TekneDetayPage() {
 
           {musait && (
             <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.2)', fontSize: '11px', position: 'absolute', bottom: '70px', left: 0, right: 0 }}>
-              Tekneye fareyle dokunun
+              {t('Tekneye fareyle dokunun', 'Hover to interact')}
             </p>
           )}
         </div>
@@ -203,7 +204,7 @@ export default function TekneDetayPage() {
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', borderRadius: '20px', background: musait ? 'rgba(34,197,94,0.12)' : hizmetdisi ? 'rgba(255,255,255,0.04)' : 'rgba(245,158,11,0.1)', border: `1px solid ${musait ? 'rgba(34,197,94,0.3)' : hizmetdisi ? 'rgba(255,255,255,0.08)' : 'rgba(245,158,11,0.25)'}` }}>
             <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: musait ? '#22c55e' : hizmetdisi ? 'rgba(255,255,255,0.3)' : '#f59e0b', display: 'inline-block', boxShadow: musait ? '0 0 6px #22c55e' : 'none', animation: musait ? 'pulseDot 2s infinite' : 'none' }} />
             <span style={{ color: musait ? '#4ade80' : hizmetdisi ? 'rgba(255,255,255,0.35)' : '#fbbf24', fontSize: '13px', fontWeight: 'bold' }}>
-              {musait ? 'Müsait' : hizmetdisi ? 'Hizmet Dışı' : 'Şu an Seferde'}
+              {musait ? t('Müsait', 'Available') : hizmetdisi ? t('Hizmet Dışı', 'Out of Service') : t('Şu an Seferde', 'Currently on Trip')}
             </span>
           </div>
         </div>
@@ -211,10 +212,10 @@ export default function TekneDetayPage() {
         {/* Teknik özellikler grid */}
         <div className="detail-card" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', marginBottom: '20px', animationDelay: '60ms' }}>
           {[
-            tekne.uzunluk ? { ikon: '📏', etiket: 'Uzunluk', deger: tekne.uzunluk } : null,
-            tekne.motor   ? { ikon: '⚙️', etiket: 'Motor',   deger: tekne.motor }   : null,
-            tekne.hiz     ? { ikon: '💨', etiket: 'Max Hız', deger: tekne.hiz }     : null,
-            { ikon: '👥', etiket: 'Kapasite', deger: `${tekne.kapasite} kişi` },
+            tekne.uzunluk ? { ikon: '📏', etiket: t('Uzunluk', 'Length'), deger: tekne.uzunluk } : null,
+            tekne.motor   ? { ikon: '⚙️', etiket: t('Motor', 'Engine'),   deger: tekne.motor }   : null,
+            tekne.hiz     ? { ikon: '💨', etiket: t('Max Hız', 'Max Speed'), deger: tekne.hiz }   : null,
+            { ikon: '👥', etiket: t('Kapasite', 'Capacity'), deger: `${tekne.kapasite} ${t('kişi', 'people')}` },
           ].filter(Boolean).map((item, i) => (
             <div key={i} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
               <span style={{ fontSize: '22px' }}>{item!.ikon}</span>
@@ -236,7 +237,7 @@ export default function TekneDetayPage() {
         {/* Özellikler */}
         {tekne.ozellikler?.length > 0 && (
           <div className="detail-card" style={{ marginBottom: '28px', animationDelay: '140ms' }}>
-            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '0.12em', margin: '0 0 12px' }}>DONANIM</p>
+            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '0.12em', margin: '0 0 12px' }}>{t('DONANIM', 'FEATURES')}</p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
               {tekne.ozellikler.map((o, i) => (
                 <span key={i} className="ozellik-chip">{o}</span>
@@ -249,18 +250,20 @@ export default function TekneDetayPage() {
         <div className="detail-card" style={{ display: 'flex', flexDirection: 'column', gap: '10px', animationDelay: '180ms' }}>
           {musait ? (
             <button
-              onClick={() => router.push('/rezervasyon')}
+              onClick={() => router.push(`/rezervasyon?tekne=${tekne.id}`)}
               style={{ width: '100%', padding: '16px', background: `linear-gradient(135deg, ${tekne.renk}, ${tekne.renk}cc)`, color: 'white', border: 'none', borderRadius: '13px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', fontFamily: 'Georgia,serif', boxShadow: `0 4px 24px ${glow}`, transition: 'all 0.2s' }}>
-              ⛵ Bu Tekne ile Rezervasyon Yap
+              {t('⚡ Bu Tekne ile Taksi Çağır', '⚡ Call Taxi with This Boat')}
             </button>
           ) : (
             <div style={{ padding: '14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '13px', textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: '14px' }}>
-              {hizmetdisi ? '🔧 Bu tekne şu an bakımda, diğer teknelerden rezervasyon yapabilirsiniz.' : '⏳ Bu tekne şu an seferde. Rezervasyon için diğer tekneleri inceleyebilirsiniz.'}
+              {hizmetdisi
+                ? t('🔧 Bu tekne şu an bakımda, diğer tekneleri çağırabilirsiniz.', '🔧 This boat is under maintenance, try another.')
+                : t('⏳ Bu tekne şu an seferde. Diğer tekneleri inceleyebilirsiniz.', '⏳ This boat is currently on a trip. Check other boats.')}
             </div>
           )}
           <button onClick={() => router.back()}
             style={{ width: '100%', padding: '14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', color: 'rgba(255,255,255,0.7)', borderRadius: '13px', fontSize: '14px', cursor: 'pointer', fontFamily: 'Georgia,serif' }}>
-            ← Tüm Teknelere Bak
+            ← {t('Tüm Teknelere Bak', 'All Boats')}
           </button>
         </div>
       </div>

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 import DumenLoading from '../../components/LoadingSpinner'
+import { useLang } from '../../components/LangProvider'
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -11,31 +12,32 @@ const supabase = createBrowserClient(
 )
 
 const KOYLAR = [
-  { isim: 'Tersane Koyu', sure: '8 dk', emoji: '🏛️' },
-  { isim: 'Akvaryum Koyu', sure: '10 dk', emoji: '🐟' },
-  { isim: 'Yassıca Adası', sure: '15 dk', emoji: '🏝️' },
-  { isim: 'Boynuz Bükü', sure: '20 dk', emoji: '⚓' },
-  { isim: 'Bedri Rahmi Koyu', sure: '18 dk', emoji: '🎨' },
-  { isim: 'Büyük Sarsala', sure: '25 dk', emoji: '🌿' },
-  { isim: 'Hamam Koyu', sure: '22 dk', emoji: '💎' },
-  { isim: 'Göcek Adası', sure: '12 dk', emoji: '🌊' },
-]
-
-const OZELLIKLER = [
-  { icon: '⚡', baslik: 'Anında Rezervasyon', aciklama: 'Kaptan onayı dakikalar içinde. Bekleme yok.' },
-  { icon: '📍', baslik: 'Gerçek Zamanlı Takip', aciklama: 'Botunuzu haritada canlı izleyin, ETA takibi yapın.' },
-  { icon: '🗺️', baslik: 'Kolay Rota Seçimi', aciklama: 'Haritadan iniş biniş noktanızı kolayca seçin.' },
-  { icon: '🛡️', baslik: 'Güvenli Ödeme', aciklama: 'Güvenli ödeme seçenekleri, sefer sonrası ücretlendirme.' },
+  { id: 'tersane',     isim: 'Tersane Koyu',     sure: '8 dk',  emoji: '🏛️' },
+  { id: 'akvaryum',   isim: 'Akvaryum Koyu',    sure: '10 dk', emoji: '🐟' },
+  { id: 'yassica',    isim: 'Yassıca Adası',    sure: '15 dk', emoji: '🏝️' },
+  { id: 'boynuz',     isim: 'Boynuz Bükü',      sure: '20 dk', emoji: '⚓' },
+  { id: 'bedri',      isim: 'Bedri Rahmi Koyu', sure: '18 dk', emoji: '🎨' },
+  { id: 'sarsala',    isim: 'Büyük Sarsala',    sure: '25 dk', emoji: '🌿' },
+  { id: 'hamam',      isim: 'Hamam Koyu',       sure: '22 dk', emoji: '💎' },
+  { id: 'gocek_adasi',isim: 'Göcek Adası',      sure: '12 dk', emoji: '🌊' },
 ]
 
 export default function AnaSayfa() {
   const router = useRouter()
+  const { lang, setLang, t: tr } = useLang()
   const [loading, setLoading] = useState(false)
   const [scrollY, setScrollY] = useState(0)
   const [activeKoy, setActiveKoy] = useState(0)
   const [user, setUser] = useState<any>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
+
+  const OZELLIKLER = [
+    { icon: '⚡', baslik: tr('Anında Taksi', 'Instant Taxi'), aciklama: tr('Kaptan onayı dakikalar içinde. Bekleme yok.', 'Captain confirmation in minutes. No waiting.') },
+    { icon: '📍', baslik: tr('Gerçek Zamanlı Takip', 'Real-Time Tracking'), aciklama: tr('Botunuzu haritada canlı izleyin, ETA takibi yapın.', 'Track your boat live on the map with ETA.') },
+    { icon: '🗺️', baslik: tr('Kolay Rota Seçimi', 'Easy Route Selection'), aciklama: tr('Haritadan iniş biniş noktanızı kolayca seçin.', 'Select your pickup & drop-off on the map.') },
+    { icon: '🛡️', baslik: tr('Güvenli Ödeme', 'Secure Payment'), aciklama: tr('Güvenli ödeme seçenekleri, sefer sonrası ücretlendirme.', 'Secure payment options, charged after the trip.') },
+  ]
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUser(data.user))
@@ -52,8 +54,8 @@ export default function AnaSayfa() {
   }, [])
 
   useEffect(() => {
-    const t = setInterval(() => setActiveKoy(k => (k + 1) % KOYLAR.length), 2500)
-    return () => clearInterval(t)
+    const timer = setInterval(() => setActiveKoy(k => (k + 1) % KOYLAR.length), 2500)
+    return () => clearInterval(timer)
   }, [])
 
   useEffect(() => {
@@ -87,16 +89,23 @@ export default function AnaSayfa() {
     setTimeout(() => router.push('/giris'), 900)
   }
 
-  const parallaxY = scrollY * 0.35
   const initials = user?.user_metadata?.full_name
     ? user.user_metadata.full_name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
     : user?.email?.slice(0, 2).toUpperCase() ?? '?'
   const displayName = user?.user_metadata?.full_name ?? user?.email?.split('@')[0] ?? ''
 
+  const langBtn = (
+    <button
+      onClick={() => setLang(lang === 'tr' ? 'en' : 'tr')}
+      style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.7)', padding: '7px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', fontFamily: 'Georgia,serif', letterSpacing: '0.05em' }}
+    >
+      {lang === 'tr' ? '🇬🇧 EN' : '🇹🇷 TR'}
+    </button>
+  )
 
   return (
     <div style={{ background: '#050e1d', minHeight: '100vh', fontFamily: "'Georgia', serif", overflowX: 'hidden' }}>
-      {loading && <DumenLoading text="Hazırlanıyor" />}
+      {loading && <DumenLoading text={tr('Hazırlanıyor', 'Loading')} />}
 
       {/* NAV */}
       <nav className="nav-inner" style={{
@@ -117,12 +126,12 @@ export default function AnaSayfa() {
         </div>
 
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          {/* Nav linkleri */}
           <button onClick={handleTekneler} className="nav-tekneler-btn" style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontSize: '14px', padding: '8px 14px', borderRadius: '20px', transition: 'all 0.2s', fontFamily: 'Georgia,serif' }}
             onMouseEnter={e => (e.currentTarget.style.color = 'white')}
             onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.6)')}>
-            ⛵ Teknelerimiz
+            ⛵ {tr('Teknelerimiz', 'Our Boats')}
           </button>
+          {langBtn}
           {user ? (
             <div ref={menuRef} style={{ position: 'relative' }}>
               <div className="avatar-btn" onClick={() => setMenuOpen(o => !o)} style={{
@@ -157,14 +166,14 @@ export default function AnaSayfa() {
                   backdropFilter: 'blur(20px)',
                 }}>
                   <div style={{ padding: '10px 12px 12px', borderBottom: '1px solid rgba(255,255,255,0.07)', marginBottom: '6px' }}>
-                    <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '0 0 2px', letterSpacing: '0.08em' }}>HESABINIZ</p>
+                    <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: '0 0 2px', letterSpacing: '0.08em' }}>{tr('HESABINIZ', 'YOUR ACCOUNT')}</p>
                     <p style={{ color: 'white', fontSize: '13px', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</p>
                   </div>
                   {[
-                    { icon: '🚤', label: 'Rezervasyon Yap', action: handleRezervasyon },
-                    { icon: '⛵', label: 'Teknelerimiz', action: handleTekneler },
-                    { icon: '📋', label: 'Sefer Geçmişi', action: () => {} },
-                    { icon: '👤', label: 'Profil Ayarları', action: () => {} },
+                    { icon: '🚤', label: tr('Taksi Çağır', 'Call a Taxi'), action: handleRezervasyon },
+                    { icon: '⛵', label: tr('Teknelerimiz', 'Our Boats'), action: handleTekneler },
+                    { icon: '📋', label: tr('Sefer Geçmişi', 'Trip History'), action: () => {} },
+                    { icon: '👤', label: tr('Profil Ayarları', 'Profile Settings'), action: () => {} },
                   ].map(item => (
                     <div key={item.label} className="dropdown-item" onClick={item.action} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', borderRadius: '8px' }}>
                       <span style={{ fontSize: '16px' }}>{item.icon}</span>
@@ -174,7 +183,7 @@ export default function AnaSayfa() {
                   <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', marginTop: '6px', paddingTop: '6px' }}>
                     <div className="dropdown-item" onClick={handleCikis} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', borderRadius: '8px' }}>
                       <span style={{ fontSize: '16px' }}>🚪</span>
-                      <span style={{ color: '#fca5a5', fontSize: '14px' }}>Çıkış Yap</span>
+                      <span style={{ color: '#fca5a5', fontSize: '14px' }}>{tr('Çıkış Yap', 'Sign Out')}</span>
                     </div>
                   </div>
                 </div>
@@ -182,8 +191,8 @@ export default function AnaSayfa() {
             </div>
           ) : (
             <>
-              <button onClick={handleGiris} className="btn-secondary nav-auth-btn" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'white', padding: '9px 18px', borderRadius: '25px', fontSize: '14px' }}>Giriş Yap</button>
-              <button onClick={handleRezervasyon} className="btn-primary nav-auth-btn" style={{ background: '#0D7EA0', border: 'none', color: 'white', padding: '9px 18px', borderRadius: '25px', fontSize: '14px', fontWeight: 'bold', boxShadow: '0 8px 24px rgba(13,126,160,0.35)' }}>Rezervasyon →</button>
+              <button onClick={handleGiris} className="btn-secondary nav-auth-btn" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'white', padding: '9px 18px', borderRadius: '25px', fontSize: '14px' }}>{tr('Giriş Yap', 'Sign In')}</button>
+              <button onClick={handleRezervasyon} className="btn-primary nav-auth-btn" style={{ background: '#0D7EA0', border: 'none', color: 'white', padding: '9px 18px', borderRadius: '25px', fontSize: '14px', fontWeight: 'bold', boxShadow: '0 8px 24px rgba(13,126,160,0.35)' }}>{tr('Taksi Çağır →', 'Call a Taxi →')}</button>
             </>
           )}
         </div>
@@ -260,25 +269,28 @@ export default function AnaSayfa() {
         <div style={{ textAlign: 'center', maxWidth: '780px', padding: '0 20px', position: 'relative', zIndex: 10, paddingTop: '80px' }}>
           <div className="fade1" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(13,126,160,0.15)', border: '1px solid rgba(13,126,160,0.35)', borderRadius: '20px', padding: '6px 16px', marginBottom: '28px' }}>
             <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#00c6ff', display: 'inline-block', boxShadow: '0 0 8px #00c6ff' }} />
-            <span style={{ color: '#00c6ff', fontSize: '13px', letterSpacing: '0.08em' }}>Göcek'te Hizmetinizdeyiz</span>
+            <span style={{ color: '#00c6ff', fontSize: '13px', letterSpacing: '0.08em' }}>{tr('Göcek\'te Hizmetinizdeyiz', 'Serving Göcek')}</span>
           </div>
 
           <h1 className="fade2" style={{ margin: '0 0 12px', lineHeight: '1.1' }}>
             <span className="hero-title-sub" style={{ display: 'block', fontSize: '32px', fontWeight: '600', color: 'rgba(255,255,255,0.75)', marginBottom: '6px' }}>
-              Koyda Her Yere,
+              {tr('Koyda Her Yere,', 'Every Cove,')}
             </span>
             <span className="hero-title-main shimmer-text" style={{ display: 'block', fontSize: '72px', fontWeight: 'bold' }}>
-              Anında Ulaşım
+              {tr('Anında Ulaşım', 'Instantly')}
             </span>
           </h1>
 
           <p className="fade3 hero-desc" style={{ color: 'rgba(255,255,255,0.55)', fontSize: '18px', lineHeight: '1.6', margin: '0 0 36px', maxWidth: '520px', marginLeft: 'auto', marginRight: 'auto' }}>
-            Göcek'in eşsiz koylarına dakikalar içinde ulaşın. Profesyonel kaptanlar, konforlu tekneler.
+            {tr(
+              'Göcek\'in eşsiz koylarına dakikalar içinde ulaşın. Profesyonel kaptanlar, konforlu tekneler.',
+              'Reach Göcek\'s stunning coves in minutes. Professional captains, comfortable boats.'
+            )}
           </p>
 
           <div className="fade3" style={{ display: 'flex', justifyContent: 'center', marginBottom: '36px' }}>
             <div className="koy-indicator" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '14px', padding: '12px 24px', display: 'inline-flex', alignItems: 'center', gap: '16px' }}>
-              <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', whiteSpace: 'nowrap' }}>Şu an</span>
+              <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', whiteSpace: 'nowrap' }}>{tr('Şu an', 'Now')}</span>
               <div key={activeKoy} style={{ display: 'flex', alignItems: 'center', gap: '8px', animation: 'slideKoy 0.4s ease-out' }}>
                 <span style={{ fontSize: '18px' }}>{KOYLAR[activeKoy].emoji}</span>
                 <span style={{ color: 'white', fontWeight: 'bold', fontSize: '15px' }}>{KOYLAR[activeKoy].isim}</span>
@@ -289,21 +301,21 @@ export default function AnaSayfa() {
 
           <div className="fade4 hero-btns" style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
             <button onClick={handleRezervasyon} className="btn-primary" style={{ background: '#0D7EA0', border: 'none', color: 'white', padding: '15px 36px', borderRadius: '30px', fontSize: '16px', fontWeight: 'bold', boxShadow: '0 12px 36px rgba(13,126,160,0.45)', letterSpacing: '0.02em' }}>
-              Bot Rezervasyonu Yap
+              ⚡ {tr('Taksi Çağır', 'Call a Taxi')}
             </button>
             {!user && (
               <button onClick={handleGiris} className="btn-secondary" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.15)', color: 'white', padding: '15px 28px', borderRadius: '30px', fontSize: '16px' }}>
-                Giriş Yap
+                {tr('Giriş Yap', 'Sign In')}
               </button>
             )}
           </div>
 
           <div className="fade4 hero-stats" style={{ display: 'flex', justifyContent: 'center', gap: '36px', marginTop: '52px', flexWrap: 'wrap' }}>
             {[
-              { sayi: '1,200+', etiket: 'Tamamlanan Sefer' },
-              { sayi: '8 dk', etiket: 'Ortalama Bekleme' },
-              { sayi: '12', etiket: 'Aktif Bot' },
-              { sayi: '22', etiket: 'Varış Noktası' },
+              { sayi: '1,200+', etiket: tr('Tamamlanan Sefer', 'Completed Trips') },
+              { sayi: '8 dk',   etiket: tr('Ortalama Bekleme', 'Avg. Wait') },
+              { sayi: '12',     etiket: tr('Aktif Bot', 'Active Boats') },
+              { sayi: '22',     etiket: tr('Varış Noktası', 'Destinations') },
             ].map(s => (
               <div key={s.sayi} style={{ textAlign: 'center' }}>
                 <div className="stat-num" style={{ fontSize: '26px', fontWeight: 'bold' }}>{s.sayi}</div>
@@ -323,23 +335,23 @@ export default function AnaSayfa() {
       {/* KOYLAR */}
       <div style={{ padding: '80px 20px', maxWidth: '1100px', margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-          <p style={{ color: '#0D7EA0', fontSize: '13px', letterSpacing: '0.2em', marginBottom: '12px' }}>KEŞFEDİN</p>
-          <h2 className="section-title" style={{ color: 'white', fontSize: '38px', fontWeight: 'bold', margin: '0 0 14px' }}>Göcek'in En Güzel Koyları</h2>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '16px', maxWidth: '480px', margin: '0 auto' }}>Hepsine sizi dakikalar içinde götürüyoruz</p>
+          <p style={{ color: '#0D7EA0', fontSize: '13px', letterSpacing: '0.2em', marginBottom: '12px' }}>{tr('KEŞFEDİN', 'EXPLORE')}</p>
+          <h2 className="section-title" style={{ color: 'white', fontSize: '38px', fontWeight: 'bold', margin: '0 0 14px' }}>{tr('Göcek\'in En Güzel Koyları', "Göcek's Most Beautiful Coves")}</h2>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '16px', maxWidth: '480px', margin: '0 auto' }}>{tr('Hepsine sizi dakikalar içinde götürüyoruz', 'We take you to all of them in minutes')}</p>
         </div>
         <div className="koy-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '14px' }}>
           {KOYLAR.map((koy, i) => (
-            <div key={i} className="koy-card" onClick={handleRezervasyon} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div key={i} className="koy-card" onClick={() => { setLoading(true); setTimeout(() => router.push(`/rezervasyon?inis=${koy.id}`), 900) }} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <span style={{ fontSize: '28px' }}>{koy.emoji}</span>
                 <div>
                   <p style={{ color: 'white', fontWeight: 'bold', fontSize: '15px', margin: 0 }}>{koy.isim}</p>
-                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '3px 0 0' }}>Göcek'ten</p>
+                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '3px 0 0' }}>{tr('Göcek\'ten', 'From Göcek')}</p>
                 </div>
               </div>
               <div style={{ textAlign: 'right' }}>
                 <p style={{ color: '#00c6ff', fontWeight: 'bold', fontSize: '17px', margin: 0 }}>{koy.sure}</p>
-                <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', margin: '2px 0 0' }}>uzaklıkta</p>
+                <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', margin: '2px 0 0' }}>{tr('uzaklıkta', 'away')}</p>
               </div>
             </div>
           ))}
@@ -349,37 +361,37 @@ export default function AnaSayfa() {
       {/* FİLOMUZ */}
       <div style={{ padding: '80px 20px', maxWidth: '1100px', margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: '36px' }}>
-          <p style={{ color: '#0D7EA0', fontSize: '13px', letterSpacing: '0.2em', marginBottom: '12px' }}>FİLOMUZ</p>
-          <h2 className="section-title" style={{ color: 'white', fontSize: '38px', fontWeight: 'bold', margin: '0 0 14px' }}>Teknelerimizle Tanışın</h2>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '16px', maxWidth: '480px', margin: '0 auto' }}>Modern ve bakımlı filomuz her zaman hizmetinizde</p>
+          <p style={{ color: '#0D7EA0', fontSize: '13px', letterSpacing: '0.2em', marginBottom: '12px' }}>{tr('FİLOMUZ', 'OUR FLEET')}</p>
+          <h2 className="section-title" style={{ color: 'white', fontSize: '38px', fontWeight: 'bold', margin: '0 0 14px' }}>{tr('Teknelerimizle Tanışın', 'Meet Our Fleet')}</h2>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '16px', maxWidth: '480px', margin: '0 auto' }}>{tr('Modern ve bakımlı filomuz her zaman hizmetinizde', 'Our modern, well-maintained fleet is always at your service')}</p>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: '14px', marginBottom: '32px' }}>
           {[
-            { emoji: '⛵', isim: 'Göcek I', kapasite: 12, durum: 'musait' },
-            { emoji: '🚤', isim: 'Göcek II', kapasite: 8, durum: 'musait' },
+            { emoji: '⛵', isim: 'Göcek I',   kapasite: 12, durum: 'musait' },
+            { emoji: '🚤', isim: 'Göcek II',  kapasite: 8,  durum: 'musait' },
             { emoji: '⛴️', isim: 'Göcek III', kapasite: 15, durum: 'mesgul' },
-            { emoji: '🛥️', isim: 'Göcek IV', kapasite: 10, durum: 'hizmetdisi' },
-          ].map((t, i) => (
+            { emoji: '🛥️', isim: 'Göcek IV',  kapasite: 10, durum: 'hizmetdisi' },
+          ].map((boat, i) => (
             <div key={i} className="koy-card" onClick={handleTekneler}
               style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '20px', display: 'flex', alignItems: 'center', gap: '14px', cursor: 'pointer' }}>
               <div style={{
                 width: '52px', height: '52px', borderRadius: '13px', flexShrink: 0,
-                background: t.durum === 'musait' ? 'rgba(13,126,160,0.15)' : t.durum === 'mesgul' ? 'rgba(245,158,11,0.1)' : 'rgba(255,255,255,0.04)',
+                background: boat.durum === 'musait' ? 'rgba(13,126,160,0.15)' : boat.durum === 'mesgul' ? 'rgba(245,158,11,0.1)' : 'rgba(255,255,255,0.04)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: '26px',
-                filter: t.durum === 'hizmetdisi' ? 'grayscale(0.7)' : 'none',
+                filter: boat.durum === 'hizmetdisi' ? 'grayscale(0.7)' : 'none',
               }}>
-                {t.emoji}
+                {boat.emoji}
               </div>
               <div style={{ flex: 1 }}>
-                <p style={{ color: t.durum === 'hizmetdisi' ? 'rgba(255,255,255,0.4)' : 'white', fontWeight: 'bold', fontSize: '15px', margin: '0 0 4px' }}>{t.isim}</p>
+                <p style={{ color: boat.durum === 'hizmetdisi' ? 'rgba(255,255,255,0.4)' : 'white', fontWeight: 'bold', fontSize: '15px', margin: '0 0 4px' }}>{boat.isim}</p>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', display: 'inline-block', background: t.durum === 'musait' ? '#22c55e' : t.durum === 'mesgul' ? '#f59e0b' : 'rgba(255,255,255,0.2)', boxShadow: t.durum === 'musait' ? '0 0 5px #22c55e' : t.durum === 'mesgul' ? '0 0 5px #f59e0b' : 'none' }} />
-                  <span style={{ color: t.durum === 'musait' ? '#4ade80' : t.durum === 'mesgul' ? '#fbbf24' : 'rgba(255,255,255,0.25)', fontSize: '12px' }}>
-                    {t.durum === 'musait' ? 'Müsait' : t.durum === 'mesgul' ? 'Seferde' : 'Hizmet Dışı'}
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', display: 'inline-block', background: boat.durum === 'musait' ? '#22c55e' : boat.durum === 'mesgul' ? '#f59e0b' : 'rgba(255,255,255,0.2)', boxShadow: boat.durum === 'musait' ? '0 0 5px #22c55e' : boat.durum === 'mesgul' ? '0 0 5px #f59e0b' : 'none' }} />
+                  <span style={{ color: boat.durum === 'musait' ? '#4ade80' : boat.durum === 'mesgul' ? '#fbbf24' : 'rgba(255,255,255,0.25)', fontSize: '12px' }}>
+                    {boat.durum === 'musait' ? tr('Müsait', 'Available') : boat.durum === 'mesgul' ? tr('Seferde', 'On Trip') : tr('Hizmet Dışı', 'Out of Service')}
                   </span>
-                  <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '11px', marginLeft: '4px' }}>· {t.kapasite} kişi</span>
+                  <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '11px', marginLeft: '4px' }}>· {boat.kapasite} {tr('kişi', 'pax')}</span>
                 </div>
               </div>
               <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '18px' }}>›</span>
@@ -389,7 +401,7 @@ export default function AnaSayfa() {
 
         <div style={{ textAlign: 'center' }}>
           <button onClick={handleTekneler} style={{ background: 'rgba(13,126,160,0.12)', border: '1px solid rgba(13,126,160,0.3)', color: '#00c6ff', padding: '12px 32px', borderRadius: '25px', fontSize: '15px', cursor: 'pointer', fontFamily: 'Georgia,serif', transition: 'all 0.2s' }}>
-            Tüm Tekneleri İncele →
+            {tr('Tüm Tekneleri İncele →', 'View All Boats →')}
           </button>
         </div>
       </div>
@@ -398,8 +410,8 @@ export default function AnaSayfa() {
       <div style={{ padding: '80px 20px', background: 'rgba(13,126,160,0.04)', borderTop: '1px solid rgba(13,126,160,0.1)', borderBottom: '1px solid rgba(13,126,160,0.1)' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-            <p style={{ color: '#0D7EA0', fontSize: '13px', letterSpacing: '0.2em', marginBottom: '12px' }}>NEDEN BİZ?</p>
-            <h2 className="section-title" style={{ color: 'white', fontSize: '38px', fontWeight: 'bold', margin: 0 }}>Her Şey Düşünüldü</h2>
+            <p style={{ color: '#0D7EA0', fontSize: '13px', letterSpacing: '0.2em', marginBottom: '12px' }}>{tr('NEDEN BİZ?', 'WHY US?')}</p>
+            <h2 className="section-title" style={{ color: 'white', fontSize: '38px', fontWeight: 'bold', margin: 0 }}>{tr('Her Şey Düşünüldü', 'Everything Considered')}</h2>
           </div>
           <div className="ozellik-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '18px' }}>
             {OZELLIKLER.map((oz, i) => (
@@ -418,10 +430,10 @@ export default function AnaSayfa() {
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 60% 60% at 50% 50%, rgba(13,126,160,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
         <div style={{ position: 'relative', zIndex: 1 }}>
           <div className="float" style={{ fontSize: '56px', marginBottom: '20px' }}>⚓</div>
-          <h2 className="cta-title" style={{ color: 'white', fontSize: '44px', fontWeight: 'bold', margin: '0 0 14px' }}>Hazır mısınız?</h2>
-          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '17px', margin: '0 0 36px' }}>İlk rezervasyonunuzu şimdi yapın</p>
+          <h2 className="cta-title" style={{ color: 'white', fontSize: '44px', fontWeight: 'bold', margin: '0 0 14px' }}>{tr('Hazır mısınız?', 'Ready to go?')}</h2>
+          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '17px', margin: '0 0 36px' }}>{tr('Hemen bir bot çağırın', 'Call a boat right now')}</p>
           <button onClick={handleRezervasyon} className="btn-primary" style={{ background: '#0D7EA0', border: 'none', color: 'white', padding: '16px 48px', borderRadius: '32px', fontSize: '17px', fontWeight: 'bold', boxShadow: '0 16px 48px rgba(13,126,160,0.5)', letterSpacing: '0.02em' }}>
-            Hemen Rezervasyon Yap →
+            ⚡ {tr('Taksi Çağır →', 'Call a Taxi →')}
           </button>
         </div>
       </div>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
+import { useLang } from '../../components/LangProvider'
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -28,14 +29,9 @@ interface Tekne {
   sira?: number
 }
 
-const DURUM_ETIKET: Record<string, { metin: string; renk: string; bg: string }> = {
-  musait: { metin: 'Müsait', renk: '#4ade80', bg: 'rgba(34,197,94,0.12)' },
-  mesgul: { metin: 'Seferde', renk: '#fbbf24', bg: 'rgba(245,158,11,0.1)' },
-  hizmetdisi: { metin: 'Hizmet Dışı', renk: 'rgba(255,255,255,0.3)', bg: 'rgba(255,255,255,0.05)' },
-}
-
 export default function TeknelerPage() {
   const router = useRouter()
+  const { lang, setLang, t } = useLang()
   const [tekneler, setTekneler] = useState<Tekne[]>([])
   const [yukleniyor, setYukleniyor] = useState(true)
 
@@ -86,17 +82,20 @@ export default function TeknelerPage() {
 
       {/* NAV */}
       <nav style={{ position: 'sticky', top: 0, zIndex: 200, background: 'rgba(5,14,29,0.97)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '12px 20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <button onClick={() => router.back()} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.55)', cursor: 'pointer', fontSize: '14px', padding: '4px 0' }}>← Geri</button>
+        <button onClick={() => router.back()} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.55)', cursor: 'pointer', fontSize: '14px', padding: '4px 0' }}>{t('← Geri', '← Back')}</button>
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
           <span style={{ fontSize: '20px' }}>⛵</span>
-          <span style={{ color: 'white', fontWeight: 'bold', fontSize: '15px' }}>Teknelerimiz</span>
+          <span style={{ color: 'white', fontWeight: 'bold', fontSize: '15px' }}>{t('Teknelerimiz', 'Our Fleet')}</span>
         </div>
-        <div style={{ width: '48px' }} />
+        <button onClick={() => setLang(lang === 'tr' ? 'en' : 'tr')}
+          style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.7)', padding: '6px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer', fontFamily: 'Georgia,serif', letterSpacing: '0.05em' }}>
+          {lang === 'tr' ? '🇬🇧 EN' : '🇹🇷 TR'}
+        </button>
       </nav>
 
       <div style={{ maxWidth: '640px', margin: '0 auto', padding: '28px 20px 60px' }}>
         <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '14px', margin: '0 0 28px', textAlign: 'center' }}>
-          Filomuz hakkında bilgi almak için bir tekneye tıklayın.
+          {t('Filomuz hakkında bilgi almak için bir tekneye tıklayın.', 'Tap a boat to learn about our fleet.')}
         </p>
 
         {yukleniyor ? (
@@ -106,30 +105,30 @@ export default function TeknelerPage() {
         ) : (
           <>
             {/* Müsait tekneler */}
-            {tekneler.filter(t => t.durum === 'musait').length > 0 && (
+            {tekneler.filter(tk => tk.durum === 'musait').length > 0 && (
               <>
-                <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '0.12em', marginBottom: '12px' }}>MÜSAİT</p>
-                {tekneler.filter(t => t.durum === 'musait').map((tekne, i) => (
+                <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '0.12em', marginBottom: '12px' }}>{t('MÜSAİT', 'AVAILABLE')}</p>
+                {tekneler.filter(tk => tk.durum === 'musait').map((tekne, i) => (
                   <TekneListeKarti key={tekne.id} tekne={tekne} delay={i * 60} onClick={() => router.push(`/tekneler/${tekne.id}`)} />
                 ))}
               </>
             )}
 
             {/* Seferde */}
-            {tekneler.filter(t => t.durum === 'mesgul').length > 0 && (
+            {tekneler.filter(tk => tk.durum === 'mesgul').length > 0 && (
               <>
-                <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '0.12em', margin: '20px 0 12px' }}>SEFERDE</p>
-                {tekneler.filter(t => t.durum === 'mesgul').map((tekne, i) => (
+                <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '0.12em', margin: '20px 0 12px' }}>{t('SEFERDE', 'ON TRIP')}</p>
+                {tekneler.filter(tk => tk.durum === 'mesgul').map((tekne, i) => (
                   <TekneListeKarti key={tekne.id} tekne={tekne} delay={i * 60 + 120} onClick={() => router.push(`/tekneler/${tekne.id}`)} />
                 ))}
               </>
             )}
 
             {/* Hizmet dışı */}
-            {tekneler.filter(t => t.durum === 'hizmetdisi').length > 0 && (
+            {tekneler.filter(tk => tk.durum === 'hizmetdisi').length > 0 && (
               <>
-                <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: '11px', letterSpacing: '0.12em', margin: '20px 0 12px' }}>HİZMET DIŞI</p>
-                {tekneler.filter(t => t.durum === 'hizmetdisi').map((tekne, i) => (
+                <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: '11px', letterSpacing: '0.12em', margin: '20px 0 12px' }}>{t('HİZMET DIŞI', 'OUT OF SERVICE')}</p>
+                {tekneler.filter(tk => tk.durum === 'hizmetdisi').map((tekne, i) => (
                   <TekneListeKarti key={tekne.id} tekne={tekne} delay={i * 60 + 180} onClick={() => router.push(`/tekneler/${tekne.id}`)} />
                 ))}
               </>
@@ -138,7 +137,7 @@ export default function TeknelerPage() {
             {tekneler.length === 0 && (
               <div style={{ textAlign: 'center', padding: '60px 0', color: 'rgba(255,255,255,0.3)' }}>
                 <p style={{ fontSize: '40px', margin: '0 0 12px' }}>⛵</p>
-                <p>Henüz tekne eklenmemiş.</p>
+                <p>{t('Henüz tekne eklenmemiş.', 'No boats added yet.')}</p>
               </div>
             )}
           </>
@@ -149,8 +148,15 @@ export default function TeknelerPage() {
 }
 
 function TekneListeKarti({ tekne, delay, onClick }: { tekne: Tekne; delay: number; onClick: () => void }) {
-  const durum = DURUM_ETIKET[tekne.durum]
+  const { t } = useLang()
   const hizmetdisi = tekne.durum === 'hizmetdisi'
+
+  const durumRenk = {
+    musait: { metin: t('Müsait', 'Available'), renk: '#4ade80', bg: 'rgba(34,197,94,0.12)' },
+    mesgul: { metin: t('Seferde', 'On Trip'), renk: '#fbbf24', bg: 'rgba(245,158,11,0.1)' },
+    hizmetdisi: { metin: t('Hizmet Dışı', 'Out of Service'), renk: 'rgba(255,255,255,0.3)', bg: 'rgba(255,255,255,0.05)' },
+  }
+  const durum = durumRenk[tekne.durum]
 
   return (
     <div
@@ -159,7 +165,6 @@ function TekneListeKarti({ tekne, delay, onClick }: { tekne: Tekne; delay: numbe
       onClick={onClick}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-        {/* Emoji + float */}
         <div style={{
           width: '64px', height: '64px', borderRadius: '16px', flexShrink: 0,
           background: `linear-gradient(135deg, ${tekne.renk}22, ${tekne.renk}08)`,
@@ -172,7 +177,6 @@ function TekneListeKarti({ tekne, delay, onClick }: { tekne: Tekne; delay: numbe
           {tekne.emoji}
         </div>
 
-        {/* Bilgiler */}
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
             <span style={{ fontSize: '18px', fontWeight: 'bold', color: hizmetdisi ? 'rgba(255,255,255,0.4)' : 'white' }}>{tekne.isim}</span>
@@ -186,7 +190,7 @@ function TekneListeKarti({ tekne, delay, onClick }: { tekne: Tekne; delay: numbe
           </p>
           <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
             <span style={{ padding: '3px 8px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '20px', color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>
-              👥 Maks {tekne.kapasite} kişi
+              👥 {t('Maks', 'Max')} {tekne.kapasite} {t('kişi', 'people')}
             </span>
           </div>
         </div>
