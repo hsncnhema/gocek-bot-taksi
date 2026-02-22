@@ -118,7 +118,7 @@ export default function AnaSayfa() {
 
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           {/* Nav linkleri */}
-          <button onClick={handleTekneler} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontSize: '14px', padding: '8px 14px', borderRadius: '20px', transition: 'all 0.2s', fontFamily: 'Georgia,serif' }}
+          <button onClick={handleTekneler} className="nav-tekneler-btn" style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontSize: '14px', padding: '8px 14px', borderRadius: '20px', transition: 'all 0.2s', fontFamily: 'Georgia,serif' }}
             onMouseEnter={e => (e.currentTarget.style.color = 'white')}
             onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.6)')}>
             ⛵ Teknelerimiz
@@ -182,8 +182,8 @@ export default function AnaSayfa() {
             </div>
           ) : (
             <>
-              <button onClick={handleGiris} className="btn-secondary" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'white', padding: '9px 18px', borderRadius: '25px', fontSize: '14px' }}>Giriş Yap</button>
-              <button onClick={handleRezervasyon} className="btn-primary" style={{ background: '#0D7EA0', border: 'none', color: 'white', padding: '9px 18px', borderRadius: '25px', fontSize: '14px', fontWeight: 'bold', boxShadow: '0 8px 24px rgba(13,126,160,0.35)' }}>Rezervasyon →</button>
+              <button onClick={handleGiris} className="btn-secondary nav-auth-btn" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'white', padding: '9px 18px', borderRadius: '25px', fontSize: '14px' }}>Giriş Yap</button>
+              <button onClick={handleRezervasyon} className="btn-primary nav-auth-btn" style={{ background: '#0D7EA0', border: 'none', color: 'white', padding: '9px 18px', borderRadius: '25px', fontSize: '14px', fontWeight: 'bold', boxShadow: '0 8px 24px rgba(13,126,160,0.35)' }}>Rezervasyon →</button>
             </>
           )}
         </div>

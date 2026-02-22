@@ -114,13 +114,13 @@ export default function TeknelerPage() {
 
 function TekneListeKarti({ tekne, delay, onClick }: { tekne: typeof TEKNELER_DETAY[number]; delay: number; onClick: () => void }) {
   const durum = DURUM_ETIKET[tekne.durum]
-  const tiklanabilir = tekne.durum !== 'hizmetdisi'
+  const hizmetdisi = tekne.durum === 'hizmetdisi'
 
   return (
     <div
-      className={`tekne-card${!tiklanabilir ? ' disabled' : ''}`}
-      style={{ animationDelay: `${delay}ms`, marginBottom: '12px' }}
-      onClick={tiklanabilir ? onClick : undefined}
+      className="tekne-card"
+      style={{ animationDelay: `${delay}ms`, marginBottom: '12px', opacity: hizmetdisi ? 0.6 : 1 }}
+      onClick={onClick}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         {/* Emoji + float */}
@@ -130,8 +130,8 @@ function TekneListeKarti({ tekne, delay, onClick }: { tekne: typeof TEKNELER_DET
           border: `1px solid ${tekne.renk}33`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: '32px',
-          animation: tiklanabilir ? 'boatFloat 3.5s ease-in-out infinite' : 'none',
-          filter: !tiklanabilir ? 'grayscale(0.8)' : 'none',
+          animation: !hizmetdisi ? 'boatFloat 3.5s ease-in-out infinite' : 'none',
+          filter: hizmetdisi ? 'grayscale(0.8)' : 'none',
         }}>
           {tekne.emoji}
         </div>
@@ -139,9 +139,9 @@ function TekneListeKarti({ tekne, delay, onClick }: { tekne: typeof TEKNELER_DET
         {/* Bilgiler */}
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
-            <span style={{ fontSize: '18px', fontWeight: 'bold', color: !tiklanabilir ? 'rgba(255,255,255,0.4)' : 'white' }}>{tekne.isim}</span>
+            <span style={{ fontSize: '18px', fontWeight: 'bold', color: hizmetdisi ? 'rgba(255,255,255,0.4)' : 'white' }}>{tekne.isim}</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '3px 8px', borderRadius: '20px', background: durum.bg }}>
-              <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: durum.renk, display: 'inline-block', boxShadow: tiklanabilir ? `0 0 5px ${durum.renk}` : 'none', animation: tekne.durum === 'musait' || tekne.durum === 'mesgul' ? 'pulseDot 2s infinite' : 'none' }} />
+              <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: durum.renk, display: 'inline-block', boxShadow: !hizmetdisi ? `0 0 5px ${durum.renk}` : 'none', animation: tekne.durum === 'musait' || tekne.durum === 'mesgul' ? 'pulseDot 2s infinite' : 'none' }} />
               <span style={{ color: durum.renk, fontSize: '11px', fontWeight: 'bold', letterSpacing: '0.04em' }}>{durum.metin}</span>
             </div>
           </div>
@@ -153,9 +153,7 @@ function TekneListeKarti({ tekne, delay, onClick }: { tekne: typeof TEKNELER_DET
           </div>
         </div>
 
-        {tiklanabilir && (
-          <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '20px', flexShrink: 0 }}>›</span>
-        )}
+        <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '20px', flexShrink: 0 }}>›</span>
       </div>
     </div>
   )
